@@ -30,14 +30,6 @@ var (
 	}
 )
 
-type UnkownOpcode struct {
-	Opcode uint16
-}
-
-func (e *UnkownOpcode) Error() string {
-	return fmt.Sprintf("chip8: unknown opcode: 0x%4X", e.Opcode)
-}
-
 // CPU represents a CHIP-8 CPU.
 type CPU struct {
 	// The 4096 bytes of memory.
@@ -68,6 +60,7 @@ type CPU struct {
 	Clock <-chan time.Time
 }
 
+// Options provides a means of configuring the CPU.
 type Options struct {
 	ClockSpeed time.Duration
 }
@@ -245,7 +238,7 @@ func (c *CPU) Dispatch(op uint16) error {
 		case 0x65:
 		}
 	default:
-		return &UnkownOpcode{Opcode: op}
+		return &UnknownOpcode{Opcode: op}
 	}
 
 	return nil
@@ -254,4 +247,13 @@ func (c *CPU) Dispatch(op uint16) error {
 // op returns the next op code.
 func (c *CPU) op() uint16 {
 	return uint16(c.Memory[c.PC])<<8 | uint16(c.Memory[c.PC+1])
+}
+
+// UnknownOpcode is return when the opcode is not recognized.
+type UnknownOpcode struct {
+	Opcode uint16
+}
+
+func (e *UnknownOpcode) Error() string {
+	return fmt.Sprintf("chip8: unknown opcode: 0x%4X", e.Opcode)
 }
