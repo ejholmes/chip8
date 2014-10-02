@@ -2,12 +2,12 @@ package chip8
 
 import "testing"
 
-func TestCPU_Cycle(t *testing.T) {
+func TestCPU_Step(t *testing.T) {
 	c := NewCPU()
 	c.Memory[200] = 0xA1
 	c.Memory[201] = 0x00
 
-	if err := c.Cycle(); err != nil {
+	if err := c.Step(); err != nil {
 		t.Fatal(err)
 	}
 
