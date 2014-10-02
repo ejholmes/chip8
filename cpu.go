@@ -360,8 +360,23 @@ func (c *CPU) Dispatch(op uint16) error {
 
 			break
 
-		// Shifts VX right by one. VF is set to the value of the least significant bit of VX before the shift.
+		// 8xy6 - SHR Vx {, Vy}
 		case 0x0006:
+			// Set Vx = Vx SHR 1.
+			//
+			// If the least-significant bit of Vx is 1, then VF is
+			// set to 1, otherwise 0. Then Vx is divided by 2.
+
+			var cf byte
+			if (c.V[x] & 0x01) == 0x01 {
+				cf = 1
+			}
+			c.V[0xF] = cf
+
+			c.V[x] = c.V[x] / 2
+
+			break
+
 		// Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
 		case 0x0007:
 		// Shifts VX left by one. VF is set to the value of the most significant bit of VX before the shift.
