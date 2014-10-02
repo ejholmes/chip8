@@ -1,11 +1,8 @@
-package chip8
+// Copyright 2014 Eric Holmes.  All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 
-import "errors"
-
-// ErrUnkownOpcode is returned when we try to execute an unkown opcode.
-var ErrUnkownOpcode = errors.New("chip8: unknown opcode")
-
-// CPU represents a CHIP-8 CPU.
+// Package chip8 provides a Go implementation of the CHIP-8 emulator.
 //
 // CHIP-8 was most commonly implemented on 4K systems, such as the
 // Cosmac VIP and the Telemac 1800. These machines had 4096 (0x1000)
@@ -18,6 +15,14 @@ var ErrUnkownOpcode = errors.New("chip8: unknown opcode")
 // are reserved for display refresh, and the 96 bytes below that
 // (0xEA0-0XEFF) were reserved for call stack, internal use, and other
 // variables.
+package chip8
+
+import "errors"
+
+// ErrUnkownOpcode is returned when we try to execute an unkown opcode.
+var ErrUnkownOpcode = errors.New("chip8: unknown opcode")
+
+// CPU represents a CHIP-8 CPU.
 type CPU struct {
 	// The 4096 bytes of memory.
 	Memory [4096]byte
