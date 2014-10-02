@@ -84,6 +84,9 @@ type CPU struct {
 	// to only execute 60 opcodes per second.
 	Clock <-chan time.Time
 
+	// The graphics array.
+	*Graphics
+
 	// Settable in tests.
 	randByteFunc func() byte
 }
@@ -100,8 +103,9 @@ func NewCPU(options *Options) *CPU {
 	}
 
 	return &CPU{
-		PC:    200,
-		Clock: time.Tick(time.Second / options.ClockSpeed),
+		PC:       200,
+		Graphics: DefaultGraphics,
+		Clock:    time.Tick(time.Second / options.ClockSpeed),
 	}
 }
 
@@ -472,23 +476,50 @@ func (c *CPU) Dispatch(op uint16) error {
 		// which is then ANDed with the value kk. The results are stored
 		// in Vx. See instruction 8xy2 for more information on AND.
 
-		x := op & 0x0F00 >> 8
+		x := (op & 0x0F00) >> 8
 		kk := byte(op)
 
 		c.V[x] = kk + c.randByte()
 
 		break
 
-	// Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a
-	// height of N pixels. Each row of 8 pixels is read as bit-coded (with the
-	// most significant bit of each byte displayed on the left) starting from
-	// memory location I; I value doesn't change after the execution of this
-	// instruction. As described above, VF is set to 1 if any screen pixels are
-	// flipped from set to unset when the sprite is drawn, and to 0 if that doesn't
-	// happen.
-	//
-	//   0xDXYN
+	// Dxyn - DRW Vx, Vy, nibble
 	case 0xD000:
+		// Display n-byte sprite starting at memory location I at (Vx,
+		// Vy), set VF = collision.
+		//
+		// The interpreter reads n bytes from memory, starting at the
+		// address stored in I. These bytes are then displayed as
+		// sprites on screen at coordinates (Vx, Vy). Sprites are XORed
+		// onto the existing screen. If this causes any pixels to be
+		// erased, VF is set to 1, otherwise it is set to 0. If the
+		// sprite is positioned so part of it is outside the coordinates
+		// of the display, it wraps around to the opposite side of the
+		// screen. See instruction 8xy3 for more information on XOR, and
+		// section 2.4, Display, for more information on the Chip-8
+		// screen and sprites.
+
+		x := c.V[(op&0x0F00)>>8]
+		y := c.V[(op&0x00F0)>>4]
+		n := op & 0x000F
+
+		// The starting coordinate (Vx, Vy).
+		s := x * y
+
+		for i := 0; uint16(i) < n; i++ {
+			// The address for this pixel on the graphics array.
+			a := s + byte(n)
+
+			// The current value of the pixel.
+			p := c.Pixels[a]
+
+			// The new value of the pixel.
+			v := c.Memory[c.I+n] ^ p
+
+			c.Pixels[a] = v
+		}
+
+		break
 
 	case 0xE000:
 		switch op & 0x00FF {
