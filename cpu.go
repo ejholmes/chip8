@@ -394,9 +394,25 @@ func (c *CPU) Dispatch(op uint16) error {
 
 			break
 
-		// Shifts VX left by one. VF is set to the value of the most significant bit of VX before the shift.
+		// 8xyE - SHL Vx {, Vy}
 		case 0x000E:
+			// Set Vx = Vx SHL 1.
+			//
+			// If the most-significant bit of Vx is 1, then VF is
+			// set to 1, otherwise to 0. Then Vx is multiplied by 2.
+
+			var cf byte
+			if (c.V[x] & 0x80) == 0x80 {
+				cf = 1
+			}
+			c.V[0xF] = cf
+
+			c.V[x] = c.V[x] * 2
+
+			break
 		}
+
+		break
 
 	// Skips the next instruction if VX doesn't equal VY.
 	//   0x9XY0
