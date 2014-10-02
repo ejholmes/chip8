@@ -323,6 +323,40 @@ var opcodeTests = map[string][]struct {
 			},
 		},
 	},
+
+	"Bnnn - JP V0, addr": {
+		{
+			uint16(0xB210),
+			nil,
+			func(t *testing.T, c *CPU) {
+				checkHex(t, "PC", c.PC, uint16(0x210))
+			},
+		},
+
+		{
+			uint16(0xB210),
+			func(t *testing.T, c *CPU) {
+				c.V[0] = 0x01
+			},
+			func(t *testing.T, c *CPU) {
+				checkHex(t, "PC", c.PC, uint16(0x211))
+			},
+		},
+	},
+
+	"Cxkk - RND Vx, byte": {
+		{
+			uint16(0xC110),
+			func(t *testing.T, c *CPU) {
+				c.randByteFunc = func() byte {
+					return 0x01
+				}
+			},
+			func(t *testing.T, c *CPU) {
+				checkHex(t, "V[1]", uint16(c.V[1]), uint16(0x11))
+			},
+		},
+	},
 }
 
 func checkHex(t *testing.T, subject string, got, want uint16) {

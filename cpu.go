@@ -19,6 +19,7 @@ package chip8
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 )
 
@@ -82,6 +83,9 @@ type CPU struct {
 	// The CHIP-8 timers count down at 60 Hz, so we slow down the cpu clock
 	// to only execute 60 opcodes per second.
 	Clock <-chan time.Time
+
+	// Settable in tests.
+	randByteFunc func() byte
 }
 
 // Options provides a means of configuring the CPU.
@@ -460,9 +464,20 @@ func (c *CPU) Dispatch(op uint16) error {
 
 		break
 
-	// Sets VX to a random number and NN.
-	//   0xCXNN
+	// Cxkk - RND Vx, byte
 	case 0xC000:
+		// Set Vx = random byte AND kk.
+		//
+		// The interpreter generates a random number from 0 to 255,
+		// which is then ANDed with the value kk. The results are stored
+		// in Vx. See instruction 8xy2 for more information on AND.
+
+		x := op & 0x0F00 >> 8
+		kk := byte(op)
+
+		c.V[x] = kk + c.randByte()
+
+		break
 
 	// Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a
 	// height of N pixels. Each row of 8 pixels is read as bit-coded (with the
@@ -530,6 +545,14 @@ func (c *CPU) op() uint16 {
 	return uint16(c.Memory[c.PC])<<8 | uint16(c.Memory[c.PC+1])
 }
 
+func (c *CPU) randByte() byte {
+	if c.randByteFunc == nil {
+		return randByte()
+	}
+
+	return c.randByteFunc()
+}
+
 // String implements the fmt.Stringer interface.
 func (c *CPU) String() string {
 	return fmt.Sprintf(
@@ -545,4 +568,9 @@ type UnknownOpcode struct {
 
 func (e *UnknownOpcode) Error() string {
 	return fmt.Sprintf("chip8: unknown opcode: 0x%04X", e.Opcode)
+}
+
+// randByte returns a random byte.
+func randByte() byte {
+	return byte(rand.Intn(255))
 }
