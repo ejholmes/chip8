@@ -18,7 +18,7 @@
 package chip8
 
 import (
-	"errors"
+	"fmt"
 	"time"
 )
 
@@ -30,8 +30,13 @@ var (
 	}
 )
 
-// ErrUnkownOpcode is returned when we try to execute an unkown opcode.
-var ErrUnkownOpcode = errors.New("chip8: unknown opcode")
+type UnkownOpcode struct {
+	Opcode uint16
+}
+
+func (e *UnkownOpcode) Error() string {
+	return fmt.Sprintf("chip8: unknown opcode: 0x%4X", e.Opcode)
+}
 
 // CPU represents a CHIP-8 CPU.
 type CPU struct {
@@ -240,7 +245,7 @@ func (c *CPU) Dispatch(op uint16) error {
 		case 0x65:
 		}
 	default:
-		return ErrUnkownOpcode
+		return &UnkownOpcode{Opcode: op}
 	}
 
 	return nil
