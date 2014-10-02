@@ -27,14 +27,6 @@ func TestCPU_Dispatch(t *testing.T) {
 		check  func(*CPU)
 	}{
 		{
-			uint16(0xA100),
-			nil,
-			func(c *CPU) {
-				checkHex(t, "I", c.I, uint16(0x100))
-			},
-		},
-
-		{
 			uint16(0x2100),
 			nil,
 			func(c *CPU) {
@@ -306,6 +298,14 @@ func TestCPU_Dispatch(t *testing.T) {
 			},
 			func(c *CPU) {
 				checkHex(t, "PC", c.PC, uint16(200))
+			},
+		},
+
+		{
+			uint16(0xA100),
+			nil,
+			func(c *CPU) {
+				checkHex(t, "I", c.I, uint16(0x100))
 			},
 		},
 	}

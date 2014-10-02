@@ -439,16 +439,26 @@ func (c *CPU) Dispatch(op uint16) error {
 
 		break
 
-	// Sets I to the address NNN.
-	//   0xANNN
+	// Annn - LD I, addr
 	case 0xA000:
+		// Set I = nnn.
+		//
+		// The value of register I is set to nnn.
+
 		c.I = op & 0x0FFF
 		c.PC += 2
+
 		break
 
-	// Jumps to the address NNN plus V0.
-	//   0xBNNN
+	// Bnnn - JP V0, addr
 	case 0xB000:
+		// Jump to location nnn + V0.
+		//
+		// The program counter is set to nnn plus the value of V0.
+
+		c.PC = op&0x0FFF + uint16(c.V[0])
+
+		break
 
 	// Sets VX to a random number and NN.
 	//   0xCXNN
