@@ -36,7 +36,7 @@ func TestCPU_Dispatch(t *testing.T) {
 			uint16(0x2100),
 			func(c *CPU) {
 				checkHex(t, "Stack[0]", c.Stack[0], uint16(0xC8))
-				checkHex(t, "SP", c.SP, uint16(0x1))
+				checkHex(t, "SP", uint16(c.SP), uint16(0x1))
 				checkHex(t, "PC", c.PC, uint16(0x100))
 			},
 		},

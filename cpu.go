@@ -77,7 +77,7 @@ type CPU struct {
 	Stack [16]uint16
 
 	// Stack pointer.
-	SP uint16
+	SP byte
 
 	// The CHIP-8 timers count down at 60 Hz, so we slow down the cpu clock
 	// to only execute 60 opcodes per second.
@@ -117,26 +117,48 @@ func (c *CPU) Step() error {
 // Dispatch executes the given opcode.
 func (c *CPU) Dispatch(op uint16) error {
 	switch op & 0xF000 {
-	//   0x0NNN
+	// 0nnn - SYS addr
 	case 0x0000:
 		switch op {
-		// Clears the screen.
+		// 00E0 - CLS
 		case 0x00E0:
+			// TODO
+			break
 
-		// Returns from a subroutine.
+		// 00EE - RET
 		case 0x00EE:
+			// Return from a subroutine.
+			//
+			// The interpreter sets the program counter to the
+			// address at the top of the stack, then subtracts 1
+			// from the stack pointer.
+			c.PC = c.Stack[c.SP]
+			c.SP--
+			break
 
-		// Calls RCA 1802 program at address NNNN
 		default:
+			// Jump to a machine code routine at nnn.
+			//
+			// This instruction is only used on the old computers on
+			// which Chip-8 was originally implemented. It is
+			// ignored by modern interpreters.
 		}
 
-	// Jumps to address NNN
-	//   0x1NNN
+	// 1nnn - JP addr
 	case 0x1000:
+		// Jump to location nnn.
+		//
+		// The interpreter sets the program counter to nnn.
+		c.PC = op & 0x0FFF
+		break
 
-	// Calls subroutine at NNN.
-	//   0x2NNN
+	// 2nnn - CALL addr
 	case 0x2000:
+		// Call subroutine at nnn.
+		//
+		// The interpreter increments the stack pointer, then puts the
+		// current PC on the top of the stack. The PC is then set to
+		// nnn.
 		c.Stack[c.SP] = c.PC
 		c.SP++
 		c.PC = op & 0x0FFF
