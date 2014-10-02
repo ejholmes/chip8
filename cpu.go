@@ -152,7 +152,11 @@ func (c *CPU) Dispatch(op uint16) error {
 			// This instruction is only used on the old computers on
 			// which Chip-8 was originally implemented. It is
 			// ignored by modern interpreters.
+
+			return &UnknownOpcode{Opcode: op}
 		}
+
+		break
 
 	// 1nnn - JP addr
 	case 0x1000:
@@ -246,36 +250,55 @@ func (c *CPU) Dispatch(op uint16) error {
 
 		break
 
-	// Adds NN to VX
-	//   0x7XNN
+	// 7xkk - ADD Vx, byte
 	case 0x7000:
+		// Set Vx = Vx + kk.
+		//
+		// Adds the value kk to the value of register Vx, then stores
+		// the result in Vx.
+
+		x := (op & 0x0F00) >> 8
+		kk := byte(op & 0x000F)
+
+		c.V[x] = c.V[x] + kk
+
+		break
 
 	case 0x8000:
-
 		switch op & 0x000F {
-		// Sets VX to the value of VY.
-		case 0x00:
+		// 8xy0 - LD Vx, Vy
+		case 0x0000:
+			// Set Vx = Vy.
+			//
+			// Stores the value of register Vy in register Vx.
+
+			x := (op & 0x0F00) >> 8
+			y := (op & 0x00F0) >> 4
+
+			c.V[x] = c.V[y]
+
+			break
 
 		// Sets VX to VX or VY.
-		case 0x01:
+		case 0x0001:
 
 		// Sets VX to VX and VY.
-		case 0x02:
+		case 0x0002:
 
 		// Sets VX to VX xor VY.
-		case 0x03:
+		case 0x0003:
 
 		// Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't.
-		case 0x04:
+		case 0x0004:
 
 		// VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
-		case 0x05:
+		case 0x0005:
 		// Shifts VX right by one. VF is set to the value of the least significant bit of VX before the shift.
-		case 0x06:
+		case 0x0006:
 		// Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
-		case 0x07:
+		case 0x0007:
 		// Shifts VX left by one. VF is set to the value of the most significant bit of VX before the shift.
-		case 0x0E:
+		case 0x000E:
 		}
 
 	// Skips the next instruction if VX doesn't equal VY.
