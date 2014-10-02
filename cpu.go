@@ -185,7 +185,7 @@ func (c *CPU) Dispatch(op uint16) error {
 	// 3xkk - SE Vx, byte
 	case 0x3000:
 		// Skip next instruction if Vx = kk.
-
+		//
 		// The interpreter compares register Vx to kk, and if they are
 		// equal, increments the program counter by 2.
 
@@ -307,7 +307,7 @@ func (c *CPU) Dispatch(op uint16) error {
 
 			break
 
-		// Set Vx = Vx AND Vy.
+		// 8xy3 - XOR Vx, Vy
 		case 0x0003:
 			// Set Vx = Vx XOR Vy.
 			//

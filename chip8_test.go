@@ -151,8 +151,7 @@ var opcodeTests = map[string][]struct {
 		},
 	},
 
-	// TODO
-	"Set Vx = Vx AND Vy": {
+	"8xy3 - XOR Vx, Vy": {
 		{
 			uint16(0x8123),
 			func(t *testing.T, c *CPU) {
