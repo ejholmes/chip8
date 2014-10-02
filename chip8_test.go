@@ -137,6 +137,63 @@ func TestCPU_Dispatch(t *testing.T) {
 				checkHex(t, "V[1]", uint16(c.V[1]), uint16(0x01))
 			},
 		},
+
+		{
+			uint16(0x8121),
+			func(c *CPU) {
+				c.V[1] = 0x10
+				c.V[2] = 0x01
+			},
+			func(c *CPU) {
+				checkHex(t, "V[1]", uint16(c.V[1]), uint16(0x11))
+			},
+		},
+
+		{
+			uint16(0x8122),
+			func(c *CPU) {
+				c.V[1] = 0x10
+				c.V[2] = 0x01
+			},
+			func(c *CPU) {
+				checkHex(t, "V[1]", uint16(c.V[1]), uint16(0x00))
+			},
+		},
+
+		{
+			uint16(0x8123),
+			func(c *CPU) {
+				c.V[1] = 0x01
+				c.V[2] = 0x01
+			},
+			func(c *CPU) {
+				checkHex(t, "V[1]", uint16(c.V[1]), uint16(0x00))
+			},
+		},
+
+		{
+			uint16(0x8124),
+			func(c *CPU) {
+				c.V[1] = 0x01
+				c.V[2] = 0x01
+			},
+			func(c *CPU) {
+				checkHex(t, "V[1]", uint16(c.V[1]), uint16(0x2))
+				checkHex(t, "VF", uint16(c.V[0xF]), uint16(0x0))
+			},
+		},
+
+		{
+			uint16(0x8124),
+			func(c *CPU) {
+				c.V[1] = 0xFF
+				c.V[2] = 0x03
+			},
+			func(c *CPU) {
+				checkHex(t, "V[1]", uint16(c.V[1]), uint16(0x2))
+				checkHex(t, "VF", uint16(c.V[0xF]), uint16(0x1))
+			},
+		},
 	}
 
 	for _, tt := range tests {

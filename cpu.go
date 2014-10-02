@@ -279,17 +279,81 @@ func (c *CPU) Dispatch(op uint16) error {
 
 			break
 
-		// Sets VX to VX or VY.
+		// 8xy1 - OR Vx, Vy
 		case 0x0001:
+			// Set Vx = Vx OR Vy.
+			//
+			// Performs a bitwise OR on the values of Vx and Vy,
+			// then stores the result in Vx. A bitwise OR compares
+			// the corrseponding bits from two values, and if either
+			// bit is 1, then the same bit in the result is also 1.
+			// Otherwise, it is 0.
 
-		// Sets VX to VX and VY.
+			x := (op & 0x0F00) >> 8
+			y := (op & 0x00F0) >> 4
+
+			c.V[x] = c.V[y] | c.V[x]
+
+			break
+
+		// 8xy2 - AND Vx, Vy
 		case 0x0002:
+			// Set Vx = Vx AND Vy.
+			//
+			// Performs a bitwise AND on the values of Vx and Vy,
+			// then stores the result in Vx. A bitwise AND compares
+			// the corrseponding bits from two values, and if both
+			// bits are 1, then the same bit in the result is also 1.
+			// Otherwise, it is 0.
 
-		// Sets VX to VX xor VY.
+			x := (op & 0x0F00) >> 8
+			y := (op & 0x00F0) >> 4
+
+			c.V[x] = c.V[y] & c.V[x]
+
+			break
+
+		// Set Vx = Vx AND Vy.
 		case 0x0003:
+			// Set Vx = Vx XOR Vy.
+			//
+			// Performs a bitwise exclusive OR on the values of Vx
+			// and Vy, then stores the result in Vx. An exclusive OR
+			// compares the corrseponding bits from two values, and
+			// if the bits are not both the same, then the
+			// corresponding bit in the result is set to 1.
+			// Otherwise, it is 0.
 
-		// Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't.
+			x := (op & 0x0F00) >> 8
+			y := (op & 0x00F0) >> 4
+
+			c.V[x] = c.V[y] ^ c.V[x]
+
+			break
+
+		// 8xy4 - ADD Vx, Vy
 		case 0x0004:
+			// Set Vx = Vx + Vy, set VF = carry.
+			//
+			// The values of Vx and Vy are added together. If the
+			// result is greater than 8 bits (i.e., > 255,) VF is
+			// set to 1, otherwise 0. Only the lowest 8 bits of the
+			// result are kept, and stored in Vx.
+
+			x := (op & 0x0F00) >> 8
+			y := (op & 0x00F0) >> 4
+
+			r := uint16(c.V[x]) + uint16(c.V[y])
+
+			var cf byte
+			if r > 0xFF {
+				cf = 1
+			}
+
+			c.V[0xF] = cf
+			c.V[x] = byte(r)
+
+			break
 
 		// VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
 		case 0x0005:
