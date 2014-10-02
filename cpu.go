@@ -377,8 +377,23 @@ func (c *CPU) Dispatch(op uint16) error {
 
 			break
 
-		// Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
+		// 8xy7 - SUBN Vx, Vy
 		case 0x0007:
+			// Set Vx = Vy - Vx, set VF = NOT borrow.
+			//
+			// If Vy > Vx, then VF is set to 1, otherwise 0. Then Vx
+			// is subtracted from Vy, and the results stored in Vx.
+
+			var cf byte
+			if c.V[y] > c.V[x] {
+				cf = 1
+			}
+			c.V[0xF] = cf
+
+			c.V[x] = c.V[y] - c.V[x]
+
+			break
+
 		// Shifts VX left by one. VF is set to the value of the most significant bit of VX before the shift.
 		case 0x000E:
 		}
