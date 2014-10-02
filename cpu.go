@@ -116,6 +116,14 @@ func (c *CPU) Step() error {
 
 // Dispatch executes the given opcode.
 func (c *CPU) Dispatch(op uint16) error {
+	// In these listings, the following variables are used:
+	//
+	// nnn or addr - A 12-bit value, the lowest 12 bits of the instruction
+	// n or nibble - A 4-bit value, the lowest 4 bits of the instruction
+	// x - A 4-bit value, the lower 4 bits of the high byte of the instruction
+	// y - A 4-bit value, the upper 4 bits of the low byte of the instruction
+	// kk or byte - An 8-bit value, the lowest 8 bits of the instruction
+
 	switch op & 0xF000 {
 	// 0nnn - SYS addr
 	case 0x0000:
@@ -132,8 +140,10 @@ func (c *CPU) Dispatch(op uint16) error {
 			// The interpreter sets the program counter to the
 			// address at the top of the stack, then subtracts 1
 			// from the stack pointer.
+
 			c.PC = c.Stack[c.SP]
 			c.SP--
+
 			break
 
 		default:
@@ -149,7 +159,9 @@ func (c *CPU) Dispatch(op uint16) error {
 		// Jump to location nnn.
 		//
 		// The interpreter sets the program counter to nnn.
+
 		c.PC = op & 0x0FFF
+
 		break
 
 	// 2nnn - CALL addr
@@ -159,26 +171,80 @@ func (c *CPU) Dispatch(op uint16) error {
 		// The interpreter increments the stack pointer, then puts the
 		// current PC on the top of the stack. The PC is then set to
 		// nnn.
+
 		c.Stack[c.SP] = c.PC
 		c.SP++
 		c.PC = op & 0x0FFF
+
 		break
 
-	// Skip the next instruction if VX equals NN.
-	//   0x3XNN
+	// 3xkk - SE Vx, byte
 	case 0x3000:
+		// Skip next instruction if Vx = kk.
 
-	// Skips the next instruction if VX doesn't equal NN.
-	//   0x4XNN
+		// The interpreter compares register Vx to kk, and if they are
+		// equal, increments the program counter by 2.
+
+		x := (op & 0x0F00) >> 8
+		kk := byte(op & 0x000F)
+
+		if c.V[x] == kk {
+			c.PC += 2
+		}
+
+		break
+
+	// 4xkk - SNE Vx, byte
 	case 0x4000:
+		// Skip next instruction if Vx != kk.
+		//
+		// The interpreter compares register Vx to kk, and if they are
+		// not equal, increments the program counter by 2.
 
-	// Skips the next instruction if VX equals VY.
-	//   0x5XY0
+		x := (op & 0x0F00) >> 8
+		kk := byte(op & 0x000F)
+
+		if c.V[x] != kk {
+			c.PC += 2
+		}
+
+		break
+
+	// 5xy0 - SE Vx, Vy
 	case 0x5000:
+		switch op & 0xF00F {
+		case 0x5000:
+			// Skip next instruction if Vx = Vy.
+			//
+			// The interpreter compares register Vx to register Vy, and if
+			// they are equal, increments the program counter by 2.
 
-	// Sets VX to NN.
-	//   0x6XNN
+			x := (op & 0x0F00) >> 8
+			y := (op & 0x00F0) >> 4
+
+			if c.V[x] == c.V[y] {
+				c.PC += 2
+			}
+
+			break
+		default:
+			return &UnknownOpcode{Opcode: op}
+		}
+
+		break
+
+	// 6xkk - LD Vx, byte
 	case 0x6000:
+		// Set Vx = kk.
+		//
+		// The interpreter puts the value kk into register Vx.
+
+		x := (op & 0x0F00) >> 8
+		kk := byte(op & 0x000F)
+
+		c.V[x] = kk
+
+		break
 
 	// Adds NN to VX
 	//   0x7XNN
@@ -220,7 +286,7 @@ func (c *CPU) Dispatch(op uint16) error {
 	//   0xANNN
 	case 0xA000:
 		c.I = op & 0x0FFF
-		c.PC = c.PC + 2
+		c.PC += 2
 		break
 
 	// Jumps to the address NNN plus V0.

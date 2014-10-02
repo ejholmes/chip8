@@ -22,11 +22,13 @@ func TestCPU_Step(t *testing.T) {
 
 func TestCPU_Dispatch(t *testing.T) {
 	tests := []struct {
-		op    uint16
-		check func(*CPU)
+		op     uint16
+		before func(*CPU)
+		check  func(*CPU)
 	}{
 		{
 			uint16(0xA100),
+			nil,
 			func(c *CPU) {
 				checkHex(t, "I", c.I, uint16(0x100))
 			},
@@ -34,16 +36,78 @@ func TestCPU_Dispatch(t *testing.T) {
 
 		{
 			uint16(0x2100),
+			nil,
 			func(c *CPU) {
 				checkHex(t, "Stack[0]", c.Stack[0], uint16(0xC8))
 				checkHex(t, "SP", uint16(c.SP), uint16(0x1))
 				checkHex(t, "PC", c.PC, uint16(0x100))
 			},
 		},
+
+		{
+			uint16(0x3123),
+			nil,
+			func(c *CPU) {
+				checkHex(t, "PC", c.PC, uint16(200))
+			},
+		},
+
+		{
+			uint16(0x3123),
+			func(c *CPU) {
+				c.V[1] = 0x03
+			},
+			func(c *CPU) {
+				checkHex(t, "PC", c.PC, uint16(202))
+			},
+		},
+
+		{
+			uint16(0x4123),
+			nil,
+			func(c *CPU) {
+				checkHex(t, "PC", c.PC, uint16(202))
+			},
+		},
+
+		{
+			uint16(0x4123),
+			func(c *CPU) {
+				c.V[1] = 0x03
+			},
+			func(c *CPU) {
+				checkHex(t, "PC", c.PC, uint16(200))
+			},
+		},
+
+		{
+			uint16(0x5120),
+			func(c *CPU) {
+				c.V[1] = 0x03
+				c.V[2] = 0x04
+			},
+			func(c *CPU) {
+				checkHex(t, "PC", c.PC, uint16(200))
+			},
+		},
+
+		{
+			uint16(0x5120),
+			func(c *CPU) {
+				c.V[1] = 0x03
+				c.V[2] = 0x03
+			},
+			func(c *CPU) {
+				checkHex(t, "PC", c.PC, uint16(202))
+			},
+		},
 	}
 
 	for _, tt := range tests {
 		c := NewCPU(nil)
+		if tt.before != nil {
+			tt.before(c)
+		}
 		c.Dispatch(tt.op)
 		tt.check(c)
 	}
