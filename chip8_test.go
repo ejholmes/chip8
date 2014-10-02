@@ -286,6 +286,28 @@ func TestCPU_Dispatch(t *testing.T) {
 				checkHex(t, "V[1]", uint16(c.V[1]), uint16(0x2))
 			},
 		},
+
+		{
+			uint16(0x9120),
+			func(c *CPU) {
+				c.V[1] = 0x01
+				c.V[2] = 0x02
+			},
+			func(c *CPU) {
+				checkHex(t, "PC", c.PC, uint16(202))
+			},
+		},
+
+		{
+			uint16(0x9120),
+			func(c *CPU) {
+				c.V[1] = 0x01
+				c.V[2] = 0x01
+			},
+			func(c *CPU) {
+				checkHex(t, "PC", c.PC, uint16(200))
+			},
+		},
 	}
 
 	for _, tt := range tests {

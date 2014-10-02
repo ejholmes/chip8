@@ -417,6 +417,27 @@ func (c *CPU) Dispatch(op uint16) error {
 	// Skips the next instruction if VX doesn't equal VY.
 	//   0x9XY0
 	case 0x9000:
+		x := (op & 0x0F00) >> 8
+		y := (op & 0x00F0) >> 4
+
+		switch op & 0x000F {
+		// 9xy0 - SNE Vx, Vy
+		case 0x0000:
+			// Skip next instruction if Vx != Vy.
+			//
+			// The values of Vx and Vy are compared, and if they are
+			// not equal, the program counter is increased by 2.
+
+			if c.V[x] != c.V[y] {
+				c.PC += 2
+			}
+
+			break
+		default:
+			return &UnknownOpcode{Opcode: op}
+		}
+
+		break
 
 	// Sets I to the address NNN.
 	//   0xANNN
