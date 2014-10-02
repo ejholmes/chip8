@@ -265,15 +265,15 @@ func (c *CPU) Dispatch(op uint16) error {
 		break
 
 	case 0x8000:
+		x := (op & 0x0F00) >> 8
+		y := (op & 0x00F0) >> 4
+
 		switch op & 0x000F {
 		// 8xy0 - LD Vx, Vy
 		case 0x0000:
 			// Set Vx = Vy.
 			//
 			// Stores the value of register Vy in register Vx.
-
-			x := (op & 0x0F00) >> 8
-			y := (op & 0x00F0) >> 4
 
 			c.V[x] = c.V[y]
 
@@ -289,9 +289,6 @@ func (c *CPU) Dispatch(op uint16) error {
 			// bit is 1, then the same bit in the result is also 1.
 			// Otherwise, it is 0.
 
-			x := (op & 0x0F00) >> 8
-			y := (op & 0x00F0) >> 4
-
 			c.V[x] = c.V[y] | c.V[x]
 
 			break
@@ -305,9 +302,6 @@ func (c *CPU) Dispatch(op uint16) error {
 			// the corrseponding bits from two values, and if both
 			// bits are 1, then the same bit in the result is also 1.
 			// Otherwise, it is 0.
-
-			x := (op & 0x0F00) >> 8
-			y := (op & 0x00F0) >> 4
 
 			c.V[x] = c.V[y] & c.V[x]
 
@@ -324,9 +318,6 @@ func (c *CPU) Dispatch(op uint16) error {
 			// corresponding bit in the result is set to 1.
 			// Otherwise, it is 0.
 
-			x := (op & 0x0F00) >> 8
-			y := (op & 0x00F0) >> 4
-
 			c.V[x] = c.V[y] ^ c.V[x]
 
 			break
@@ -340,9 +331,6 @@ func (c *CPU) Dispatch(op uint16) error {
 			// set to 1, otherwise 0. Only the lowest 8 bits of the
 			// result are kept, and stored in Vx.
 
-			x := (op & 0x0F00) >> 8
-			y := (op & 0x00F0) >> 4
-
 			r := uint16(c.V[x]) + uint16(c.V[y])
 
 			var cf byte
@@ -355,8 +343,23 @@ func (c *CPU) Dispatch(op uint16) error {
 
 			break
 
-		// VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
+		// 8xy5 - SUB Vx, Vy
 		case 0x0005:
+			// Set Vx = Vx - Vy, set VF = NOT borrow.
+			//
+			// If Vx > Vy, then VF is set to 1, otherwise 0. Then Vy
+			// is subtracted from Vx, and the results stored in Vx.
+
+			var cf byte
+			if c.V[x] > c.V[y] {
+				cf = 1
+			}
+			c.V[0xF] = cf
+
+			c.V[x] = c.V[x] - c.V[y]
+
+			break
+
 		// Shifts VX right by one. VF is set to the value of the least significant bit of VX before the shift.
 		case 0x0006:
 		// Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
