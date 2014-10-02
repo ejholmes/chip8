@@ -5,19 +5,21 @@ import "errors"
 // ErrUnkownOpcode is returned when we try to execute an unkown opcode.
 var ErrUnkownOpcode = errors.New("chip8: unknown opcode")
 
-// CPU represents a Chip8 CPU.
+// CPU represents a CHIP-8 CPU.
+//
+// CHIP-8 was most commonly implemented on 4K systems, such as the
+// Cosmac VIP and the Telemac 1800. These machines had 4096 (0x1000)
+// memory locations, all of which are 8 bits (a byte) which is where the
+// term CHIP-8 originated. However, the CHIP-8 interpreter itself
+// occupies the first 512 bytes of the memory space on these machines.
+// For this reason, most programs written for the original system begin
+// at memory location 512 (0x200) and do not access any of the memory
+// below the location 512 (0x200). The uppermost 256 bytes (0xF00-0xFFF)
+// are reserved for display refresh, and the 96 bytes below that
+// (0xEA0-0XEFF) were reserved for call stack, internal use, and other
+// variables.
 type CPU struct {
-	// CHIP-8 was most commonly implemented on 4K systems, such as the
-	// Cosmac VIP and the Telemac 1800. These machines had 4096 (0x1000)
-	// memory locations, all of which are 8 bits (a byte) which is where the
-	// term CHIP-8 originated. However, the CHIP-8 interpreter itself
-	// occupies the first 512 bytes of the memory space on these machines.
-	// For this reason, most programs written for the original system begin
-	// at memory location 512 (0x200) and do not access any of the memory
-	// below the location 512 (0x200). The uppermost 256 bytes (0xF00-0xFFF)
-	// are reserved for display refresh, and the 96 bytes below that
-	// (0xEA0-0XEFF) were reserved for call stack, internal use, and other
-	// variables.
+	// The 4096 bytes of memory.
 	Memory [4096]byte
 
 	// The address register, which is named I, is 16 bits wide and is used
