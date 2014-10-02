@@ -190,7 +190,7 @@ func (c *CPU) Dispatch(op uint16) error {
 		// equal, increments the program counter by 2.
 
 		x := (op & 0x0F00) >> 8
-		kk := byte(op & 0x000F)
+		kk := byte(op)
 
 		if c.V[x] == kk {
 			c.PC += 2
@@ -206,7 +206,7 @@ func (c *CPU) Dispatch(op uint16) error {
 		// not equal, increments the program counter by 2.
 
 		x := (op & 0x0F00) >> 8
-		kk := byte(op & 0x000F)
+		kk := byte(op)
 
 		if c.V[x] != kk {
 			c.PC += 2
@@ -244,7 +244,7 @@ func (c *CPU) Dispatch(op uint16) error {
 		// The interpreter puts the value kk into register Vx.
 
 		x := (op & 0x0F00) >> 8
-		kk := byte(op & 0x000F)
+		kk := byte(op)
 
 		c.V[x] = kk
 
@@ -258,7 +258,7 @@ func (c *CPU) Dispatch(op uint16) error {
 		// the result in Vx.
 
 		x := (op & 0x0F00) >> 8
-		kk := byte(op & 0x000F)
+		kk := byte(op)
 
 		c.V[x] = c.V[x] + kk
 
@@ -528,6 +528,14 @@ func (c *CPU) Dispatch(op uint16) error {
 // op returns the next op code.
 func (c *CPU) op() uint16 {
 	return uint16(c.Memory[c.PC])<<8 | uint16(c.Memory[c.PC+1])
+}
+
+// String implements the fmt.Stringer interface.
+func (c *CPU) String() string {
+	return fmt.Sprintf(
+		"I=0x%04X pc=0x%04X V[x]=%v SP=0x%04X",
+		c.I, c.PC, c.Stack, c.SP,
+	)
 }
 
 // UnknownOpcode is return when the opcode is not recognized.

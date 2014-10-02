@@ -4,7 +4,7 @@ import "testing"
 
 func checkHex(t *testing.T, subject string, got, want uint16) {
 	if got != want {
-		t.Errorf("%s => 0x%04X; want 0x%04x", subject, got, want)
+		t.Errorf("%s => 0x%04X; want 0x%04X", subject, got, want)
 	}
 }
 
@@ -45,7 +45,7 @@ func TestCPU_Dispatch(t *testing.T) {
 		},
 
 		{
-			uint16(0x3123),
+			uint16(0x3103),
 			func(c *CPU) {
 				c.V[1] = 0x03
 			},
@@ -63,7 +63,7 @@ func TestCPU_Dispatch(t *testing.T) {
 		},
 
 		{
-			uint16(0x4123),
+			uint16(0x4103),
 			func(c *CPU) {
 				c.V[1] = 0x03
 			},
@@ -317,6 +317,14 @@ func TestCPU_Dispatch(t *testing.T) {
 		}
 		c.Dispatch(tt.op)
 		tt.check(c)
+
+		if t.Failed() {
+			t.Logf("==============")
+			t.Logf("Opcode: 0x%04X", tt.op)
+			t.Logf("CPU: %v", c)
+			t.Logf("==============")
+			t.FailNow()
+		}
 	}
 }
 
