@@ -17,7 +17,18 @@
 // variables.
 package chip8
 
-import "errors"
+import (
+	"errors"
+	"time"
+)
+
+// Sensible defaults
+var (
+	DefaultClockSpeed = time.Duration(60) // Hz
+	DefaultOptions    = &Options{
+		ClockSpeed: DefaultClockSpeed,
+	}
+)
 
 // ErrUnkownOpcode is returned when we try to execute an unkown opcode.
 var ErrUnkownOpcode = errors.New("chip8: unknown opcode")
@@ -46,17 +57,33 @@ type CPU struct {
 
 	// Stack pointer.
 	SP uint16
+
+	// The CHIP-8 timers count down at 60 Hz, so we slow down the cpu clock
+	// to only execute 60 opcodes per second.
+	Clock <-chan time.Time
+}
+
+type Options struct {
+	ClockSpeed time.Duration
 }
 
 // NewCPU returns a new CPU instance.
-func NewCPU() *CPU {
+func NewCPU(options *Options) *CPU {
+	if options == nil {
+		options = DefaultOptions
+	}
+
 	return &CPU{
-		PC: 200,
+		PC:    200,
+		Clock: time.Tick(time.Second / options.ClockSpeed),
 	}
 }
 
 // Step runs a single CPU cycle.
 func (c *CPU) Step() error {
+	// Simulate the clock speed of the CHIP-8 CPU.
+	<-c.Clock
+
 	// Dispatch the opcode.
 	if err := c.Dispatch(c.op()); err != nil {
 		return err

@@ -3,7 +3,7 @@ package chip8
 import "testing"
 
 func TestCPU_Step(t *testing.T) {
-	c := NewCPU()
+	c := NewCPU(nil)
 	c.Memory[200] = 0xA1
 	c.Memory[201] = 0x00
 
@@ -32,14 +32,14 @@ func TestCPU_Dispatch(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		c := NewCPU()
+		c := NewCPU(nil)
 		c.Dispatch(tt.op)
 		tt.check(c)
 	}
 }
 
 func TestCPU_op(t *testing.T) {
-	c := NewCPU()
+	c := NewCPU(nil)
 	c.Memory[200] = 0xA2
 	c.Memory[201] = 0xF0
 
