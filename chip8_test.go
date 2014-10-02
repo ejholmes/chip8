@@ -2,6 +2,12 @@ package chip8
 
 import "testing"
 
+func checkHex(t *testing.T, subject string, got, want uint16) {
+	if got != want {
+		t.Errorf("%s => 0x%04X; want 0x%04x", subject, got, want)
+	}
+}
+
 func TestCPU_Step(t *testing.T) {
 	c := NewCPU(nil)
 	c.Memory[200] = 0xA1
@@ -11,9 +17,7 @@ func TestCPU_Step(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if got, want := c.PC, uint16(202); got != want {
-		t.Errorf("PC => %d; want %d", got, want)
-	}
+	checkHex(t, "PC", c.PC, uint16(202))
 }
 
 func TestCPU_Dispatch(t *testing.T) {
@@ -24,9 +28,16 @@ func TestCPU_Dispatch(t *testing.T) {
 		{
 			uint16(0xA100),
 			func(c *CPU) {
-				if got, want := c.I, uint16(0x100); got != want {
-					t.Errorf("I => %x; want %x", got, want)
-				}
+				checkHex(t, "I", c.I, uint16(0x100))
+			},
+		},
+
+		{
+			uint16(0x2100),
+			func(c *CPU) {
+				checkHex(t, "Stack[0]", c.Stack[0], uint16(0xC8))
+				checkHex(t, "SP", c.SP, uint16(0x1))
+				checkHex(t, "PC", c.PC, uint16(0x100))
 			},
 		},
 	}
@@ -43,7 +54,5 @@ func TestCPU_op(t *testing.T) {
 	c.Memory[200] = 0xA2
 	c.Memory[201] = 0xF0
 
-	if got, want := c.op(), uint16(0xA2F0); got != want {
-		t.Errorf("op => %x; want %x", got, want)
-	}
+	checkHex(t, "op", c.op(), uint16(0xA2F0))
 }

@@ -33,6 +33,30 @@ var (
 // CPU represents a CHIP-8 CPU.
 type CPU struct {
 	// The 4096 bytes of memory.
+	//
+	// Memory Map:
+	// +---------------+= 0xFFF (4095) End of Chip-8 RAM
+	// |               |
+	// |               |
+	// |               |
+	// |               |
+	// |               |
+	// | 0x200 to 0xFFF|
+	// |     Chip-8    |
+	// | Program / Data|
+	// |     Space     |
+	// |               |
+	// |               |
+	// |               |
+	// +- - - - - - - -+= 0x600 (1536) Start of ETI 660 Chip-8 programs
+	// |               |
+	// |               |
+	// |               |
+	// +---------------+= 0x200 (512) Start of most Chip-8 programs
+	// | 0x000 to 0x1FF|
+	// | Reserved for  |
+	// |  interpreter  |
+	// +---------------+= 0x000 (0) Start of Chip-8 RAM
 	Memory [4096]byte
 
 	// The address register, which is named I, is 16 bits wide and is used
@@ -50,7 +74,7 @@ type CPU struct {
 	// called. The original 1802 version allocated 48 bytes for up to 12
 	// levels of nesting; modern implementations normally have at least 16
 	// levels.
-	Stack [16]byte
+	Stack [16]uint16
 
 	// Stack pointer.
 	SP uint16
@@ -87,9 +111,6 @@ func (c *CPU) Step() error {
 		return err
 	}
 
-	// Increment the program counter by 2.
-	c.PC = c.PC + 2
-
 	return nil
 }
 
@@ -116,6 +137,10 @@ func (c *CPU) Dispatch(op uint16) error {
 	// Calls subroutine at NNN.
 	//   0x2NNN
 	case 0x2000:
+		c.Stack[c.SP] = c.PC
+		c.SP++
+		c.PC = op & 0x0FFF
+		break
 
 	// Skip the next instruction if VX equals NN.
 	//   0x3XNN
@@ -173,6 +198,7 @@ func (c *CPU) Dispatch(op uint16) error {
 	//   0xANNN
 	case 0xA000:
 		c.I = op & 0x0FFF
+		c.PC = c.PC + 2
 		break
 
 	// Jumps to the address NNN plus V0.
@@ -255,5 +281,5 @@ type UnknownOpcode struct {
 }
 
 func (e *UnknownOpcode) Error() string {
-	return fmt.Sprintf("chip8: unknown opcode: 0x%4X", e.Opcode)
+	return fmt.Sprintf("chip8: unknown opcode: 0x%04X", e.Opcode)
 }
