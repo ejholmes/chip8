@@ -4,8 +4,6 @@
 
 package chip8
 
-import "fmt"
-
 var DefaultKeyboard = &keyboard{}
 
 // Keyboard represents a CHIP-8 Keyboard.
@@ -21,10 +19,10 @@ type keyboard struct{}
 
 // Get waits for a keypress.
 func (k *keyboard) Get() (byte, error) {
-	var b string
-	if _, err := fmt.Scan(&b); err != nil {
-		return 0, err
-	}
+	//var b string
+	//if _, err := fmt.Scan(&b); err != nil {
+	//return 0, err
+	//}
 
 	return 0x01, nil
 }

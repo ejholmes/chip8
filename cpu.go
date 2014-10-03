@@ -598,6 +598,8 @@ func (c *CPU) Dispatch(op uint16) error {
 			c.Pixels[a] = v
 		}
 
+		c.Graphics.Draw()
+
 		c.PC += 2
 
 		break
