@@ -406,6 +406,23 @@ func TestOpcodes(t *testing.T) {
 	}
 }
 
+func TestCPU_Load(t *testing.T) {
+	c := NewCPU(nil)
+	p := []byte{0x01, 0x02}
+
+	n, err := c.LoadBytes(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if n != len(p) {
+		t.Fatal(err)
+	}
+
+	checkHex(t, "Memory[200]", c.Memory[200], 0x01)
+	checkHex(t, "Memory[201]", c.Memory[201], 0x02)
+}
+
 func TestCPU_op(t *testing.T) {
 	c := NewCPU(nil)
 	c.Memory[200] = 0xA2

@@ -4,9 +4,13 @@
 
 package chip8
 
+const (
+	GraphicsWidth  = 64 // Pixels
+	GraphicsHeight = 32 // Pixels
+)
+
 var (
-	DefaultDisplay  = Display(&terminalDisplay{})
-	DefaultGraphics = &Graphics{}
+	DefaultDisplay = Display(&terminalDisplay{})
 )
 
 // Display represents the output display for the CHIP-8 graphics array.
@@ -18,7 +22,7 @@ type Display interface {
 // Graphics represents the graphics array for the CHIP-8.
 type Graphics struct {
 	// The raw pixels of the graphics array.
-	Pixels [64 * 32]byte
+	Pixels [GraphicsWidth * GraphicsHeight]byte
 
 	// The display to render to.
 	Display

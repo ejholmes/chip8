@@ -18,7 +18,9 @@
 package chip8
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"math/rand"
 	"time"
 )
@@ -104,9 +106,20 @@ func NewCPU(options *Options) *CPU {
 
 	return &CPU{
 		PC:       200,
-		Graphics: DefaultGraphics,
+		Graphics: &Graphics{},
 		Clock:    time.Tick(time.Second / options.ClockSpeed),
 	}
+}
+
+// Load reads from the reader and loads the bytes into memory starting at
+// address 200.
+func (c *CPU) Load(r io.Reader) (int, error) {
+	return r.Read(c.Memory[200:])
+}
+
+// LoadBytes loads the bytes into memory.
+func (c *CPU) LoadBytes(p []byte) (int, error) {
+	return c.Load(bytes.NewReader(p))
 }
 
 // Step runs a single CPU cycle.
