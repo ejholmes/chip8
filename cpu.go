@@ -614,8 +614,21 @@ func (c *CPU) Dispatch(op uint16) error {
 		// Sets VX to the value of the delay timer.
 		case 0x07:
 
-		// A key press is awaited, and then stored in VX.
+		// Fx0A - LD Vx, K
 		case 0x0A:
+			// Wait for a key press, store the value of the key in
+			// Vx.
+			//
+			// All execution stops until a key is pressed, then the
+			// value of that key is stored in Vx.
+
+			// TODO keyboard
+
+			c.V[x] = 0x0
+
+			c.PC += 2
+
+			break
 
 		// Sets the delay timer to VX.
 		case 0x15:
@@ -626,9 +639,20 @@ func (c *CPU) Dispatch(op uint16) error {
 		// Adds VX to I.
 		case 0x1E:
 
-		// Sets I to the location of the sprite for the character in VX. Characters
-		// 0-F (in hexadecimal) are represented by a 4x5 font.
+		// Fx29 - LD F, Vx
 		case 0x29:
+			// Set I = location of sprite for digit Vx.
+			//
+			// The value of I is set to the location for the
+			// hexadecimal sprite corresponding to the value of Vx.
+			// See section 2.4, Display, for more information on the
+			// Chip-8 hexadecimal font.
+
+			c.I = x * 0x04
+
+			c.PC += 2
+
+			break
 
 		// Fx33 - LD B, Vx
 		case 0x33:
