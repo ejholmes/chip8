@@ -99,27 +99,42 @@ type Options struct {
 }
 
 // NewCPU returns a new CPU instance.
-func NewCPU(options *Options) *CPU {
+func NewCPU(options *Options) (*CPU, error) {
 	if options == nil {
 		options = DefaultOptions
 	}
 
-	return &CPU{
+	c := &CPU{
 		PC:       0x200,
 		Graphics: &Graphics{},
 		Clock:    time.Tick(time.Second / options.ClockSpeed),
 	}
+
+	return c, c.init()
 }
 
 // Load reads from the reader and loads the bytes into memory starting at
 // address 200.
 func (c *CPU) Load(r io.Reader) (int, error) {
-	return r.Read(c.Memory[0x200:])
+	return c.load(0x200, r)
 }
 
 // LoadBytes loads the bytes into memory.
 func (c *CPU) LoadBytes(p []byte) (int, error) {
 	return c.Load(bytes.NewReader(p))
+}
+
+func (c *CPU) load(offset int, r io.Reader) (int, error) {
+	return r.Read(c.Memory[offset:])
+}
+
+// init loads initalizes the cpu by loading the fontset into RAM.
+func (c *CPU) init() error {
+	if _, err := c.load(0, bytes.NewReader(FontSet)); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Step runs a single CPU cycle.

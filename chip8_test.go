@@ -373,7 +373,7 @@ var opcodeTests = map[string][]struct {
 }
 
 func TestCPU_Step(t *testing.T) {
-	c := NewCPU(nil)
+	c, _ := NewCPU(nil)
 	c.Memory[0x200] = 0xA1
 	c.Memory[0x201] = 0x00
 
@@ -387,7 +387,7 @@ func TestCPU_Step(t *testing.T) {
 func TestOpcodes(t *testing.T) {
 	for i, tests := range opcodeTests {
 		for _, tt := range tests {
-			c := NewCPU(nil)
+			c, _ := NewCPU(nil)
 			if tt.before != nil {
 				tt.before(t, c)
 			}
@@ -407,7 +407,7 @@ func TestOpcodes(t *testing.T) {
 }
 
 func TestCPU_Load(t *testing.T) {
-	c := NewCPU(nil)
+	c, _ := NewCPU(nil)
 	p := []byte{0x01, 0x02}
 
 	n, err := c.LoadBytes(p)
@@ -424,7 +424,7 @@ func TestCPU_Load(t *testing.T) {
 }
 
 func TestCPU_op(t *testing.T) {
-	c := NewCPU(nil)
+	c, _ := NewCPU(nil)
 	c.Memory[0x200] = 0xA2
 	c.Memory[0x201] = 0xF0
 
