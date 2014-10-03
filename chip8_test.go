@@ -12,7 +12,7 @@ var opcodeTests = map[string][]struct {
 			0x2100,
 			nil,
 			func(t *testing.T, c *CPU) {
-				checkHex(t, "Stack[0]", c.Stack[0], 0xC8)
+				checkHex(t, "Stack[0]", c.Stack[0], 0x200)
 				checkHex(t, "SP", c.SP, 0x1)
 				checkHex(t, "PC", c.PC, 0x100)
 			},
@@ -24,7 +24,7 @@ var opcodeTests = map[string][]struct {
 			0x3123,
 			nil,
 			func(t *testing.T, c *CPU) {
-				checkHex(t, "PC", c.PC, 200)
+				checkHex(t, "PC", c.PC, 0x200)
 			},
 		},
 
@@ -34,7 +34,7 @@ var opcodeTests = map[string][]struct {
 				c.V[1] = 0x03
 			},
 			func(t *testing.T, c *CPU) {
-				checkHex(t, "PC", c.PC, 202)
+				checkHex(t, "PC", c.PC, 0x202)
 			},
 		},
 	},
@@ -44,7 +44,7 @@ var opcodeTests = map[string][]struct {
 			0x4123,
 			nil,
 			func(t *testing.T, c *CPU) {
-				checkHex(t, "PC", c.PC, 202)
+				checkHex(t, "PC", c.PC, 0x202)
 			},
 		},
 
@@ -54,7 +54,7 @@ var opcodeTests = map[string][]struct {
 				c.V[1] = 0x03
 			},
 			func(t *testing.T, c *CPU) {
-				checkHex(t, "PC", c.PC, 200)
+				checkHex(t, "PC", c.PC, 0x200)
 			},
 		},
 	},
@@ -67,7 +67,7 @@ var opcodeTests = map[string][]struct {
 				c.V[2] = 0x04
 			},
 			func(t *testing.T, c *CPU) {
-				checkHex(t, "PC", c.PC, 200)
+				checkHex(t, "PC", c.PC, 0x200)
 			},
 		},
 
@@ -78,7 +78,7 @@ var opcodeTests = map[string][]struct {
 				c.V[2] = 0x03
 			},
 			func(t *testing.T, c *CPU) {
-				checkHex(t, "PC", c.PC, 202)
+				checkHex(t, "PC", c.PC, 0x202)
 			},
 		},
 	},
@@ -298,7 +298,7 @@ var opcodeTests = map[string][]struct {
 				c.V[2] = 0x02
 			},
 			func(t *testing.T, c *CPU) {
-				checkHex(t, "PC", c.PC, 202)
+				checkHex(t, "PC", c.PC, 0x202)
 			},
 		},
 
@@ -309,7 +309,7 @@ var opcodeTests = map[string][]struct {
 				c.V[2] = 0x01
 			},
 			func(t *testing.T, c *CPU) {
-				checkHex(t, "PC", c.PC, 200)
+				checkHex(t, "PC", c.PC, 0x200)
 			},
 		},
 	},
@@ -374,14 +374,14 @@ var opcodeTests = map[string][]struct {
 
 func TestCPU_Step(t *testing.T) {
 	c := NewCPU(nil)
-	c.Memory[200] = 0xA1
-	c.Memory[201] = 0x00
+	c.Memory[0x200] = 0xA1
+	c.Memory[0x201] = 0x00
 
 	if err := c.Step(); err != nil {
 		t.Fatal(err)
 	}
 
-	checkHex(t, "PC", c.PC, 202)
+	checkHex(t, "PC", c.PC, 0x202)
 }
 
 func TestOpcodes(t *testing.T) {
@@ -419,14 +419,14 @@ func TestCPU_Load(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	checkHex(t, "Memory[200]", c.Memory[200], 0x01)
-	checkHex(t, "Memory[201]", c.Memory[201], 0x02)
+	checkHex(t, "Memory[0x200]", c.Memory[0x200], 0x01)
+	checkHex(t, "Memory[0x201]", c.Memory[0x201], 0x02)
 }
 
 func TestCPU_op(t *testing.T) {
 	c := NewCPU(nil)
-	c.Memory[200] = 0xA2
-	c.Memory[201] = 0xF0
+	c.Memory[0x200] = 0xA2
+	c.Memory[0x201] = 0xF0
 
 	checkHex(t, "op", c.op(), 0xA2F0)
 }

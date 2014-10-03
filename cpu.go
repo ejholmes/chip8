@@ -105,7 +105,7 @@ func NewCPU(options *Options) *CPU {
 	}
 
 	return &CPU{
-		PC:       200,
+		PC:       0x200,
 		Graphics: &Graphics{},
 		Clock:    time.Tick(time.Second / options.ClockSpeed),
 	}
@@ -114,7 +114,7 @@ func NewCPU(options *Options) *CPU {
 // Load reads from the reader and loads the bytes into memory starting at
 // address 200.
 func (c *CPU) Load(r io.Reader) (int, error) {
-	return r.Read(c.Memory[200:])
+	return r.Read(c.Memory[0x200:])
 }
 
 // LoadBytes loads the bytes into memory.
