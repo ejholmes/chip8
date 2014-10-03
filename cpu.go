@@ -177,10 +177,6 @@ func (c *CPU) Dispatch(op uint16) error {
 	// y - A 4-bit value, the upper 4 bits of the low byte of the instruction
 	// kk or byte - An 8-bit value, the lowest 8 bits of the instruction
 
-	// Increment the program counter by 2 here. Some opcodes will override
-	// this.
-	c.PC += 2
-
 	switch op & 0xF000 {
 	// 0nnn - SYS addr
 	case 0x0000:
@@ -249,6 +245,7 @@ func (c *CPU) Dispatch(op uint16) error {
 		x := (op & 0x0F00) >> 8
 		kk := byte(op)
 
+		c.PC += 2
 		if c.V[x] == kk {
 			c.PC += 2
 		}
@@ -265,6 +262,7 @@ func (c *CPU) Dispatch(op uint16) error {
 		x := (op & 0x0F00) >> 8
 		kk := byte(op)
 
+		c.PC += 2
 		if c.V[x] != kk {
 			c.PC += 2
 		}
@@ -283,6 +281,7 @@ func (c *CPU) Dispatch(op uint16) error {
 			x := (op & 0x0F00) >> 8
 			y := (op & 0x00F0) >> 4
 
+			c.PC += 2
 			if c.V[x] == c.V[y] {
 				c.PC += 2
 			}
@@ -305,6 +304,8 @@ func (c *CPU) Dispatch(op uint16) error {
 
 		c.V[x] = kk
 
+		c.PC += 2
+
 		break
 
 	// 7xkk - ADD Vx, byte
@@ -318,6 +319,8 @@ func (c *CPU) Dispatch(op uint16) error {
 		kk := byte(op)
 
 		c.V[x] = c.V[x] + kk
+
+		c.PC += 2
 
 		break
 
@@ -334,6 +337,8 @@ func (c *CPU) Dispatch(op uint16) error {
 
 			c.V[x] = c.V[y]
 
+			c.PC += 2
+
 			break
 
 		// 8xy1 - OR Vx, Vy
@@ -347,6 +352,8 @@ func (c *CPU) Dispatch(op uint16) error {
 			// Otherwise, it is 0.
 
 			c.V[x] = c.V[y] | c.V[x]
+
+			c.PC += 2
 
 			break
 
@@ -362,6 +369,8 @@ func (c *CPU) Dispatch(op uint16) error {
 
 			c.V[x] = c.V[y] & c.V[x]
 
+			c.PC += 2
+
 			break
 
 		// 8xy3 - XOR Vx, Vy
@@ -376,6 +385,8 @@ func (c *CPU) Dispatch(op uint16) error {
 			// Otherwise, it is 0.
 
 			c.V[x] = c.V[y] ^ c.V[x]
+
+			c.PC += 2
 
 			break
 
@@ -394,9 +405,11 @@ func (c *CPU) Dispatch(op uint16) error {
 			if r > 0xFF {
 				cf = 1
 			}
-
 			c.V[0xF] = cf
+
 			c.V[x] = byte(r)
+
+			c.PC += 2
 
 			break
 
@@ -415,6 +428,8 @@ func (c *CPU) Dispatch(op uint16) error {
 
 			c.V[x] = c.V[x] - c.V[y]
 
+			c.PC += 2
+
 			break
 
 		// 8xy6 - SHR Vx {, Vy}
@@ -431,6 +446,8 @@ func (c *CPU) Dispatch(op uint16) error {
 			c.V[0xF] = cf
 
 			c.V[x] = c.V[x] / 2
+
+			c.PC += 2
 
 			break
 
@@ -449,6 +466,8 @@ func (c *CPU) Dispatch(op uint16) error {
 
 			c.V[x] = c.V[y] - c.V[x]
 
+			c.PC += 2
+
 			break
 
 		// 8xyE - SHL Vx {, Vy}
@@ -465,6 +484,8 @@ func (c *CPU) Dispatch(op uint16) error {
 			c.V[0xF] = cf
 
 			c.V[x] = c.V[x] * 2
+
+			c.PC += 2
 
 			break
 		}
@@ -485,6 +506,7 @@ func (c *CPU) Dispatch(op uint16) error {
 			// The values of Vx and Vy are compared, and if they are
 			// not equal, the program counter is increased by 2.
 
+			c.PC += 2
 			if c.V[x] != c.V[y] {
 				c.PC += 2
 			}
@@ -530,6 +552,8 @@ func (c *CPU) Dispatch(op uint16) error {
 
 		c.V[x] = kk + c.randByte()
 
+		c.PC += 2
+
 		break
 
 	// Dxyn - DRW Vx, Vy, nibble
@@ -567,6 +591,8 @@ func (c *CPU) Dispatch(op uint16) error {
 
 			c.Pixels[a] = v
 		}
+
+		c.PC += 2
 
 		break
 
@@ -610,8 +636,23 @@ func (c *CPU) Dispatch(op uint16) error {
 		// Stores V0 to VX in memory starting at address I.
 		case 0x55:
 
-		// Fills V0 to VX with values from memory starting at address I.
+		// Fx65 - LD Vx, [I]
 		case 0x65:
+			// Read registers V0 through Vx from memory starting at
+			// location I.
+			//
+			// The interpreter reads values from memory starting at
+			// location I into registers V0 through Vx.
+
+			x := (op & 0x0F00) >> 8
+
+			for i := 0; byte(i) < byte(x); i++ {
+				c.V[uint16(i)] = c.Memory[c.I+uint16(i)]
+			}
+
+			c.PC += 2
+
+			break
 		}
 	default:
 		return &UnknownOpcode{Opcode: op}

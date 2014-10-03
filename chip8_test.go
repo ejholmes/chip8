@@ -24,7 +24,7 @@ var opcodeTests = map[string][]struct {
 			0x3123,
 			nil,
 			func(t *testing.T, c *CPU) {
-				checkHex(t, "PC", c.PC, 0x200)
+				checkHex(t, "PC", c.PC, 0x202)
 			},
 		},
 
@@ -34,7 +34,7 @@ var opcodeTests = map[string][]struct {
 				c.V[1] = 0x03
 			},
 			func(t *testing.T, c *CPU) {
-				checkHex(t, "PC", c.PC, 0x202)
+				checkHex(t, "PC", c.PC, 0x204)
 			},
 		},
 	},
@@ -44,7 +44,7 @@ var opcodeTests = map[string][]struct {
 			0x4123,
 			nil,
 			func(t *testing.T, c *CPU) {
-				checkHex(t, "PC", c.PC, 0x202)
+				checkHex(t, "PC", c.PC, 0x204)
 			},
 		},
 
@@ -54,7 +54,7 @@ var opcodeTests = map[string][]struct {
 				c.V[1] = 0x03
 			},
 			func(t *testing.T, c *CPU) {
-				checkHex(t, "PC", c.PC, 0x200)
+				checkHex(t, "PC", c.PC, 0x202)
 			},
 		},
 	},
@@ -67,7 +67,7 @@ var opcodeTests = map[string][]struct {
 				c.V[2] = 0x04
 			},
 			func(t *testing.T, c *CPU) {
-				checkHex(t, "PC", c.PC, 0x200)
+				checkHex(t, "PC", c.PC, 0x202)
 			},
 		},
 
@@ -78,7 +78,7 @@ var opcodeTests = map[string][]struct {
 				c.V[2] = 0x03
 			},
 			func(t *testing.T, c *CPU) {
-				checkHex(t, "PC", c.PC, 0x202)
+				checkHex(t, "PC", c.PC, 0x204)
 			},
 		},
 	},
@@ -298,7 +298,7 @@ var opcodeTests = map[string][]struct {
 				c.V[2] = 0x02
 			},
 			func(t *testing.T, c *CPU) {
-				checkHex(t, "PC", c.PC, 0x202)
+				checkHex(t, "PC", c.PC, 0x204)
 			},
 		},
 
@@ -309,7 +309,7 @@ var opcodeTests = map[string][]struct {
 				c.V[2] = 0x01
 			},
 			func(t *testing.T, c *CPU) {
-				checkHex(t, "PC", c.PC, 0x200)
+				checkHex(t, "PC", c.PC, 0x202)
 			},
 		},
 	},
@@ -367,6 +367,34 @@ var opcodeTests = map[string][]struct {
 			},
 			func(t *testing.T, c *CPU) {
 				checkHex(t, "Pixel", c.Pixels[0], 0x00)
+			},
+		},
+	},
+
+	"Fx65 - LD Vx, [I]": {
+		{
+			0xF165,
+			func(t *testing.T, c *CPU) {
+				c.Memory[0x200] = 0x01
+				c.Memory[0x201] = 0x02
+				c.I = 0x200
+			},
+			func(t *testing.T, c *CPU) {
+				checkHex(t, "V[0]", c.V[0], 0x01)
+				checkHex(t, "V[1]", c.V[1], 0x00)
+			},
+		},
+
+		{
+			0xF265,
+			func(t *testing.T, c *CPU) {
+				c.Memory[0x200] = 0x01
+				c.Memory[0x201] = 0x02
+				c.I = 0x200
+			},
+			func(t *testing.T, c *CPU) {
+				checkHex(t, "V[0]", c.V[0], 0x01)
+				checkHex(t, "V[1]", c.V[1], 0x02)
 			},
 		},
 	},
