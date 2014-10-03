@@ -131,7 +131,7 @@ func (c *CPU) load(offset int, r io.Reader) (int, error) {
 // init loads initalizes the cpu by loading the fontset into RAM.
 func (c *CPU) init() error {
 	if _, err := c.load(0, bytes.NewReader(FontSet)); err != nil {
-		return err
+		return fmt.Errorf("chip8: could not load font set: %s", err.Error())
 	}
 
 	return nil
