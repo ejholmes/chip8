@@ -138,13 +138,30 @@ func (c *CPU) init() error {
 }
 
 // Step runs a single CPU cycle.
-func (c *CPU) Step() error {
+func (c *CPU) Step() (uint16, error) {
 	// Simulate the clock speed of the CHIP-8 CPU.
 	<-c.Clock
 
+	// Decode the opcode.
+	op := c.op()
+
 	// Dispatch the opcode.
 	if err := c.Dispatch(c.op()); err != nil {
-		return err
+		return op, err
+	}
+
+	return op, nil
+}
+
+// Run does the thing.
+func (c *CPU) Run() error {
+	for {
+		op, err := c.Step()
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("op=0x%04X %s\n", op, c)
 	}
 
 	return nil
@@ -159,6 +176,10 @@ func (c *CPU) Dispatch(op uint16) error {
 	// x - A 4-bit value, the lower 4 bits of the high byte of the instruction
 	// y - A 4-bit value, the upper 4 bits of the low byte of the instruction
 	// kk or byte - An 8-bit value, the lowest 8 bits of the instruction
+
+	// Increment the program counter by 2 here. Some opcodes will override
+	// this.
+	c.PC += 2
 
 	switch op & 0xF000 {
 	// 0nnn - SYS addr
@@ -615,8 +636,8 @@ func (c *CPU) randByte() byte {
 // String implements the fmt.Stringer interface.
 func (c *CPU) String() string {
 	return fmt.Sprintf(
-		"I=0x%04X pc=0x%04X V[x]=%v SP=0x%04X",
-		c.I, c.PC, c.Stack, c.SP,
+		"I=0x%04X pc=0x%04X V[x]=%v stack=%v SP=0x%04X",
+		c.I, c.PC, c.V, c.Stack, c.SP,
 	)
 }
 
@@ -631,5 +652,5 @@ func (e *UnknownOpcode) Error() string {
 
 // randByte returns a random byte.
 func randByte() byte {
-	return byte(rand.Intn(255))
+	return byte(rand.New(rand.NewSource(time.Now().UnixNano())).Intn(255))
 }

@@ -377,7 +377,7 @@ func TestCPU_Step(t *testing.T) {
 	c.Memory[0x200] = 0xA1
 	c.Memory[0x201] = 0x00
 
-	if err := c.Step(); err != nil {
+	if _, err := c.Step(); err != nil {
 		t.Fatal(err)
 	}
 
