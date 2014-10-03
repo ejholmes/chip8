@@ -1,0 +1,15 @@
+{
+	"ImportPath": "github.com/ejholmes/chip8",
+	"GoVersion": "go1.3",
+	"Deps": [
+		{
+			"ImportPath": "github.com/mattn/go-runewidth",
+			"Comment": "travisish-24-ge924e65",
+			"Rev": "e924e6534529fd53643e9791bd0490eca65e902b"
+		},
+		{
+			"ImportPath": "github.com/nsf/termbox-go",
+			"Rev": "bb19a81afd4bc2729799d1fedb19f7bd7ee284cf"
+		}
+	]
+}

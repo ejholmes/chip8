@@ -10,6 +10,12 @@ import (
 	"github.com/ejholmes/chip8"
 )
 
+var (
+	Options  = chip8.DefaultOptions
+	Display  = chip8.DefaultDisplay
+	Keyboard = chip8.DefaultKeyboard
+)
+
 func main() {
 	var (
 		program = flag.String("program", "", "Path to the program to run.")
@@ -17,11 +23,24 @@ func main() {
 	)
 	flag.Parse()
 
-	chip8.DefaultOptions.ClockSpeed = time.Duration(*clock)
+	f, err := os.Create("log")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	logger := log.New(f, "", 0)
+	chip8.DefaultLogger = logger
+
+	Options.ClockSpeed = time.Duration(*clock)
+	Display.Init()
+	defer Display.Close()
+
+	Keyboard.Init()
 
 	c, err := chip8.NewCPU(nil)
 	if err != nil {
-		log.Fatal(err)
+		logger.Println(err)
+		os.Exit(-2)
 	}
 
 	if *program == "" {
@@ -31,9 +50,15 @@ func main() {
 
 	raw, err := ioutil.ReadFile(*program)
 	if err != nil {
-		log.Fatal(err)
+		logger.Println(err)
+		os.Exit(-2)
 	}
 
+	// Load the program into RAM.
 	c.LoadBytes(raw)
-	log.Fatal(c.Run())
+
+	// Run it.
+	if err := c.Run(); err != nil {
+		logger.Println(err)
+	}
 }

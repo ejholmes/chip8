@@ -21,12 +21,15 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"math/rand"
+	"os"
 	"time"
 )
 
 // Sensible defaults
 var (
+	DefaultLogger     = log.New(os.Stdout, "", 0)
 	DefaultClockSpeed = time.Duration(60) // Hz
 	DefaultOptions    = &Options{
 		ClockSpeed: DefaultClockSpeed,
@@ -94,6 +97,8 @@ type CPU struct {
 
 	// Settable in tests.
 	randByteFunc func() byte
+
+	Logger *log.Logger
 }
 
 // Options provides a means of configuring the CPU.
@@ -164,7 +169,7 @@ func (c *CPU) Run() error {
 			return err
 		}
 
-		fmt.Printf("op=0x%04X %s\n", op, c)
+		c.logger().Printf("op=0x%04X %s\n", op, c)
 	}
 
 	return nil
@@ -742,6 +747,15 @@ func (c *CPU) String() string {
 		"I=0x%04X pc=0x%04X V[x]=%v stack=%v SP=0x%04X",
 		c.I, c.PC, c.V, c.Stack, c.SP,
 	)
+}
+
+// logger returns the logger to use for debugging.
+func (c *CPU) logger() *log.Logger {
+	if c.Logger == nil {
+		return DefaultLogger
+	}
+
+	return c.Logger
 }
 
 // UnknownOpcode is return when the opcode is not recognized.

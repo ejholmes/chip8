@@ -1,7 +1,7 @@
 .PHONY: cmd test
 
 test:
-	go test
+	godep go test
 
 cmd:
-	go build -o ./build/chip8 ./cmd/chip8
+	godep go build -o ./build/chip8 ./cmd/chip8

@@ -4,17 +4,25 @@
 
 package chip8
 
+import "github.com/nsf/termbox-go"
+
 const (
 	GraphicsWidth  = 64 // Pixels
 	GraphicsHeight = 32 // Pixels
 )
 
 var (
-	DefaultDisplay = Display(&terminalDisplay{})
+	DefaultDisplay = Display(&display{})
 )
 
 // Display represents the output display for the CHIP-8 graphics array.
 type Display interface {
+	// Turn on the display and do any initialization.
+	Init() error
+
+	// Turn off the display and cleanup.
+	Close()
+
 	// Render should render the current graphics array to the display.
 	Render(*Graphics) error
 }
@@ -41,11 +49,46 @@ func (g *Graphics) display() Display {
 	return g.Display
 }
 
-// terminalDisplay is an implementation of the Display interface that renders
+// display is an implementation of the Display interface that renders
 // the graphics array to the terminal.
-type terminalDisplay struct {
+type display struct{}
+
+func (d *display) Init() error {
+	if err := termbox.Init(); err != nil {
+		return err
+	}
+
+	termbox.HideCursor()
+
+	if err := termbox.Clear(termbox.ColorWhite, termbox.ColorWhite); err != nil {
+		return err
+	}
+
+	return termbox.Flush()
 }
 
-func (d *terminalDisplay) Render(g *Graphics) error {
-	return nil
+func (d *display) Close() {
+	termbox.Close()
+}
+
+func (d *display) Render(g *Graphics) error {
+	for x := 0; x < GraphicsWidth; x++ {
+		for y := 0; y < GraphicsHeight; y++ {
+			v := ' '
+
+			if g.Pixels[x*y] == 0x01 {
+				v = '*'
+			}
+
+			termbox.SetCell(
+				x,
+				y,
+				v,
+				termbox.ColorBlack,
+				termbox.ColorWhite,
+			)
+		}
+	}
+
+	return termbox.Flush()
 }
