@@ -184,6 +184,9 @@ func (c *CPU) Dispatch(op uint16) error {
 		// 00E0 - CLS
 		case 0x00E0:
 			// TODO
+
+			c.PC += 2
+
 			break
 
 		// 00EE - RET
@@ -605,6 +608,8 @@ func (c *CPU) Dispatch(op uint16) error {
 		case 0xA1:
 		}
 	case 0xF000:
+		x := (op & 0x0F00) >> 8
+
 		switch op & 0x00FF {
 		// Sets VX to the value of the delay timer.
 		case 0x07:
@@ -625,13 +630,23 @@ func (c *CPU) Dispatch(op uint16) error {
 		// 0-F (in hexadecimal) are represented by a 4x5 font.
 		case 0x29:
 
-		// Stores the Binary-coded decimal representation of VX, with the most
-		// significant of three digits at the address in I, the middle digit at
-		// I plus 1, and the least significant digit at I plus 2. (In other words,
-		// take the decimal representation of VX, place the hundreds digit in
-		// memory at location in I, the tens digit at location I+1, and the ones
-		// digit at location I+2.)
+		// Fx33 - LD B, Vx
 		case 0x33:
+			// Store BCD representation of Vx in memory locations I,
+			// I+1, and I+2.
+			//
+			// The interpreter takes the decimal value of Vx, and
+			// places the hundreds digit in memory at location in I,
+			// the tens digit at location I+1, and the ones digit at
+			// location I+2.
+
+			c.Memory[c.I] = c.V[x] / 100
+			c.Memory[c.I+1] = (c.V[x] / 10) % 10
+			c.Memory[c.I+2] = (c.V[x] % 100) % 10
+
+			c.PC += 2
+
+			break
 
 		// Stores V0 to VX in memory starting at address I.
 		case 0x55:
@@ -643,8 +658,6 @@ func (c *CPU) Dispatch(op uint16) error {
 			//
 			// The interpreter reads values from memory starting at
 			// location I into registers V0 through Vx.
-
-			x := (op & 0x0F00) >> 8
 
 			for i := 0; byte(i) < byte(x); i++ {
 				c.V[uint16(i)] = c.Memory[c.I+uint16(i)]

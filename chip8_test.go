@@ -371,6 +371,21 @@ var opcodeTests = map[string][]struct {
 		},
 	},
 
+	"Fx33 - LD B, Vx": {
+		{
+			0xF033,
+			func(t *testing.T, c *CPU) {
+				c.V[0] = 0xFF
+				c.I = 0x200
+			},
+			func(t *testing.T, c *CPU) {
+				checkHex(t, "Memory[0x200]", c.Memory[0x200], 0x02)
+				checkHex(t, "Memory[0x201]", c.Memory[0x201], 0x05)
+				checkHex(t, "Memory[0x201]", c.Memory[0x201], 0x05)
+			},
+		},
+	},
+
 	"Fx65 - LD Vx, [I]": {
 		{
 			0xF165,
