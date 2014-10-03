@@ -89,6 +89,9 @@ type CPU struct {
 	// The graphics array.
 	*Graphics
 
+	// The connected Keyboard.
+	Keyboard Keyboard
+
 	// Settable in tests.
 	randByteFunc func() byte
 }
@@ -622,9 +625,12 @@ func (c *CPU) Dispatch(op uint16) error {
 			// All execution stops until a key is pressed, then the
 			// value of that key is stored in Vx.
 
-			// TODO keyboard
+			b, err := c.getKey()
+			if err != nil {
+				return err
+			}
 
-			c.V[x] = 0x0
+			c.V[x] = b
 
 			c.PC += 2
 
@@ -709,6 +715,23 @@ func (c *CPU) randByte() byte {
 	}
 
 	return c.randByteFunc()
+}
+
+func (c *CPU) getKey() (byte, error) {
+	b, err := c.keyboard().Get()
+	if err != nil {
+		return b, fmt.Errorf("chip8: unable to get key from keyboard: %s", err.Error())
+	}
+
+	return b, nil
+}
+
+func (c *CPU) keyboard() Keyboard {
+	if c.Keyboard == nil {
+		return DefaultKeyboard
+	}
+
+	return c.Keyboard
 }
 
 // String implements the fmt.Stringer interface.
