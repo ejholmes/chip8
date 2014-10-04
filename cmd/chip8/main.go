@@ -11,9 +11,9 @@ import (
 )
 
 var (
-	Options  = chip8.DefaultOptions
-	Display  = chip8.DefaultDisplay
-	Keyboard = chip8.DefaultKeyboard
+	Options = chip8.DefaultOptions
+	Display = chip8.DefaultDisplay
+	Keypad  = chip8.DefaultKeypad
 )
 
 func main() {
@@ -35,7 +35,7 @@ func main() {
 	Display.Init()
 	defer Display.Close()
 
-	Keyboard.Init()
+	Keypad.Init()
 
 	c, err := chip8.NewCPU(nil)
 	if err != nil {

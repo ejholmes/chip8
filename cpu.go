@@ -99,8 +99,8 @@ type CPU struct {
 	// The graphics array.
 	Graphics
 
-	// The connected Keyboard. The zero value is the DefaultKeyboard.
-	Keyboard Keyboard
+	// The connected Keypad. The zero value is the DefaultKeypad.
+	Keypad Keypad
 
 	// A logger to log information about the CPU while it's executing. The
 	// zero value is the DefaultLogger.
@@ -729,20 +729,20 @@ func (c *CPU) randByte() byte {
 }
 
 func (c *CPU) getKey() (byte, error) {
-	b, err := c.keyboard().Get()
+	b, err := c.keypad().Get()
 	if err != nil {
-		return b, fmt.Errorf("chip8: unable to get key from keyboard: %s", err.Error())
+		return b, fmt.Errorf("chip8: unable to get key from keypad: %s", err.Error())
 	}
 
 	return b, nil
 }
 
-func (c *CPU) keyboard() Keyboard {
-	if c.Keyboard == nil {
-		return DefaultKeyboard
+func (c *CPU) keypad() Keypad {
+	if c.Keypad == nil {
+		return DefaultKeypad
 	}
 
-	return c.Keyboard
+	return c.Keypad
 }
 
 // String implements the fmt.Stringer interface.

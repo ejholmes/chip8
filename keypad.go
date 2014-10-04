@@ -10,14 +10,14 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-var DefaultKeyboard = &keyboard{}
+var DefaultKeypad = &keyboard{}
 
 var (
 	ErrQuit = errors.New("quit key pressed")
 )
 
-// Keyboard represents a CHIP-8 Keyboard.
-type Keyboard interface {
+// Keypad represents a CHIP-8 Keypad.
+type Keypad interface {
 	// Do any initialization.
 	Init() error
 
@@ -26,7 +26,7 @@ type Keyboard interface {
 	Get() (byte, error)
 }
 
-// keyboard is a Keyboard implementation that maps keys
+// keyboard is a Keypad implementation that maps keys
 // from a standard keyboard to the CHIP-8 keyboard.
 type keyboard struct{}
 
