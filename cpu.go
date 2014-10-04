@@ -653,8 +653,16 @@ func (c *CPU) Dispatch(op uint16) error {
 		// Sets the sound timer to VX.
 		case 0x18:
 
-		// Adds VX to I.
+		// Fx1E - ADD I, Vx
 		case 0x1E:
+			// Set I = I + Vx.
+			//
+			// The values of I and Vx are added, and the results are
+			// stored in I.
+
+			c.I = c.I + uint16(c.V[x])
+
+			break
 
 		// Fx29 - LD F, Vx
 		case 0x29:

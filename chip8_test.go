@@ -432,7 +432,9 @@ var opcodeTests = map[string][]struct {
 
 		{
 			0xF129,
-			nil,
+			func(t *testing.T, c *CPU) {
+				c.V[0x01] = 0x01
+			},
 			func(t *testing.T, c *CPU) {
 				checkHex(t, "I", c.I, 0x05)
 			},
@@ -440,7 +442,9 @@ var opcodeTests = map[string][]struct {
 
 		{
 			0xF229,
-			nil,
+			func(t *testing.T, c *CPU) {
+				c.V[0x02] = 0x02
+			},
 			func(t *testing.T, c *CPU) {
 				checkHex(t, "I", c.I, 0x0A)
 			},
@@ -473,7 +477,7 @@ var opcodeTests = map[string][]struct {
 			func(t *testing.T, c *CPU) {
 				checkHex(t, "V[0]", c.V[0], 0x01)
 				checkHex(t, "V[1]", c.V[1], 0x02)
-				checkHex(t, "V[2]", c.V[1], 0x00)
+				checkHex(t, "V[2]", c.V[2], 0x00)
 			},
 		},
 
