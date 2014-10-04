@@ -199,6 +199,7 @@ func (c *CPU) Dispatch(op uint16) error {
 		switch op {
 		// 00E0 - CLS
 		case 0x00E0:
+			c.Graphics.Clear()
 
 			c.PC += 2
 
