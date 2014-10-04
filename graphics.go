@@ -32,7 +32,7 @@ type Graphics struct {
 	// The raw pixels of the graphics array.
 	Pixels [GraphicsWidth * GraphicsHeight]byte
 
-	// The display to render to.
+	// The display to render to. The nil value is the DefaultDisplay.
 	Display
 }
 
@@ -49,6 +49,11 @@ func (g *Graphics) display() Display {
 	return g.Display
 }
 
+var (
+	fg = termbox.ColorBlack
+	bg = termbox.ColorDefault
+)
+
 // display is an implementation of the Display interface that renders
 // the graphics array to the terminal.
 type display struct{}
@@ -60,7 +65,7 @@ func (d *display) Init() error {
 
 	termbox.HideCursor()
 
-	if err := termbox.Clear(termbox.ColorWhite, termbox.ColorWhite); err != nil {
+	if err := termbox.Clear(bg, bg); err != nil {
 		return err
 	}
 
@@ -72,11 +77,13 @@ func (d *display) Close() {
 }
 
 func (d *display) Render(g *Graphics) error {
-	for x := 0; x < GraphicsWidth; x++ {
-		for y := 0; y < GraphicsHeight; y++ {
+	for y := 0; y < GraphicsHeight-1; y++ {
+		for x := 0; x < GraphicsWidth-1; x++ {
+			c := y*GraphicsWidth + x
 			v := ' '
 
-			if g.Pixels[x*y] == 0x01 {
+			if g.Pixels[c] == 0x01 {
+				DefaultLogger.Printf("x=%d y=%d coord=%d value=%d", x, y, c, g.Pixels[c])
 				v = '*'
 			}
 
@@ -84,8 +91,8 @@ func (d *display) Render(g *Graphics) error {
 				x,
 				y,
 				v,
-				termbox.ColorBlack,
-				termbox.ColorWhite,
+				fg,
+				bg,
 			)
 		}
 	}

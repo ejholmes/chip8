@@ -21,17 +21,24 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"math/rand"
-	"os"
 	"time"
 )
 
 // Sensible defaults
 var (
-	DefaultLogger     = log.New(os.Stdout, "", 0)
+	// DefaultLogger is the default logger to use. Defaults to logging to /dev/null
+	DefaultLogger = log.New(ioutil.Discard, "", 0)
+
+	// DefaultClockSpeed is the default clock speed of the CPU. The CHIP-8
+	// operated at 60 Hz.
 	DefaultClockSpeed = time.Duration(60) // Hz
-	DefaultOptions    = &Options{
+
+	// DefaultOptions is the default set of options that's used when calling
+	// NewCPU.
+	DefaultOptions = &Options{
 		ClockSpeed: DefaultClockSpeed,
 	}
 )
@@ -90,15 +97,17 @@ type CPU struct {
 	Clock <-chan time.Time
 
 	// The graphics array.
-	*Graphics
+	Graphics
 
-	// The connected Keyboard.
+	// The connected Keyboard. The zero value is the DefaultKeyboard.
 	Keyboard Keyboard
+
+	// A logger to log information about the CPU while it's executing. The
+	// zero value is the DefaultLogger.
+	Logger *log.Logger
 
 	// Settable in tests.
 	randByteFunc func() byte
-
-	Logger *log.Logger
 }
 
 // Options provides a means of configuring the CPU.
@@ -113,9 +122,8 @@ func NewCPU(options *Options) (*CPU, error) {
 	}
 
 	c := &CPU{
-		PC:       0x200,
-		Graphics: &Graphics{},
-		Clock:    time.Tick(time.Second / options.ClockSpeed),
+		PC:    0x200,
+		Clock: time.Tick(time.Second / options.ClockSpeed),
 	}
 
 	return c, c.init()
@@ -583,29 +591,28 @@ func (c *CPU) Dispatch(op uint16) error {
 		// section 2.4, Display, for more information on the Chip-8
 		// screen and sprites.
 
+		var cf byte
 		x := c.V[(op&0x0F00)>>8]
 		y := c.V[(op&0x00F0)>>4]
 		n := op & 0x000F
 
-		// The starting coordinate (Vx, Vy).
-		s := x * y
+		for yl := 0; uint16(yl) < n; yl++ {
+			p := c.Memory[c.I+uint16(yl)]
 
-		for i := 0; uint16(i) < n; i++ {
-			// The address for this pixel on the graphics array.
-			a := s + byte(n)
-
-			// The current value of the pixel.
-			p := c.Pixels[a]
-
-			// The new value of the pixel.
-			v := c.Memory[c.I+n] ^ p
-
-			c.Pixels[a] = v
+			for xl := 0; xl < 8; xl++ {
+				if (p & (0x80 >> byte(xl))) != 0 {
+					a := x + byte(xl) + ((y + byte(yl)) * GraphicsWidth)
+					if c.Pixels[a] == 0x01 {
+						cf = 0x01
+					}
+					c.Pixels[a] = c.Pixels[a] ^ 0x01
+				}
+			}
 		}
+		c.V[0xF] = cf
+		c.PC += 2
 
 		c.Graphics.Draw()
-
-		c.PC += 2
 
 		break
 

@@ -28,19 +28,15 @@ type Keyboard interface {
 
 // keyboard is a Keyboard implementation that maps keys
 // from a standard keyboard to the CHIP-8 keyboard.
-type keyboard struct {
-	events chan termbox.Event
-}
+type keyboard struct{}
 
 func (k *keyboard) Init() error {
-	k.events = make(chan termbox.Event)
-	go k.poll()
 	return nil
 }
 
 // Get waits for a keypress.
 func (k *keyboard) Get() (byte, error) {
-	event := <-k.events
+	event := termbox.PollEvent()
 
 	if event.Ch == 'q' {
 		return 0x00, ErrQuit
@@ -51,8 +47,4 @@ func (k *keyboard) Get() (byte, error) {
 
 // polls for keyboard events.
 func (k *keyboard) poll() {
-	for {
-		event := termbox.PollEvent()
-		k.events <- event
-	}
 }
