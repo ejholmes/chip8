@@ -78,6 +78,21 @@ func (g *Graphics) WriteSprite(sprite []byte, x, y byte) (collision bool) {
 	return
 }
 
+// Clear clears the display.
+func (g *Graphics) Clear() {
+	for y := 0; y < GraphicsHeight-1; y++ {
+		for x := 0; x < GraphicsWidth-1; x++ {
+			c := y*GraphicsWidth + x
+			g.Pixels[c] = 0
+		}
+	}
+}
+
+// Draw draws the graphics array to the Display.
+func (g *Graphics) Draw() error {
+	return g.display().Render(g)
+}
+
 func (g *Graphics) String() string {
 	var s string
 
@@ -96,11 +111,6 @@ func (g *Graphics) String() string {
 	}
 
 	return s
-}
-
-// Draw draws the graphics array to the Display.
-func (g *Graphics) Draw() error {
-	return g.display().Render(g)
 }
 
 func (g *Graphics) display() Display {

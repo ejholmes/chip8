@@ -199,7 +199,6 @@ func (c *CPU) Dispatch(op uint16) error {
 		switch op {
 		// 00E0 - CLS
 		case 0x00E0:
-			// TODO
 
 			c.PC += 2
 
@@ -665,7 +664,7 @@ func (c *CPU) Dispatch(op uint16) error {
 			// See section 2.4, Display, for more information on the
 			// Chip-8 hexadecimal font.
 
-			c.I = x * 0x04
+			c.I = uint16(c.V[x]) * uint16(0x05)
 
 			c.PC += 2
 
@@ -700,7 +699,7 @@ func (c *CPU) Dispatch(op uint16) error {
 			// The interpreter reads values from memory starting at
 			// location I into registers V0 through Vx.
 
-			for i := 0; byte(i) < byte(x); i++ {
+			for i := 0; byte(i) <= byte(x); i++ {
 				c.V[uint16(i)] = c.Memory[c.I+uint16(i)]
 			}
 
