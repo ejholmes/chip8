@@ -602,35 +602,10 @@ func (c *CPU) Dispatch(op uint16) error {
 		// The height of the sprite.
 		n := op & 0x000F
 
-		for yl := 0; uint16(yl) < n; yl++ {
-			// A row of sprite data.
-			r := c.Memory[c.I+uint16(yl)]
-
-			for xl := 0; xl < 8; xl++ {
-				// This represents a mask for the bit that we
-				// care about for this coordinate.
-				i := 0x80 >> byte(xl)
-
-				var v byte
-
-				// Whether the bit should be set or not
-				if (r & byte(i)) == byte(i) {
-					v = 0x01
-				}
-
-				// The address for this bit of data on the
-				// graphics array.
-				a := uint16(x) + uint16(xl) + ((uint16(y) + uint16(yl)) * GraphicsWidth)
-
-				// If there's a collision, set the carry flag.
-				if c.Pixels[a] == 0x01 {
-					cf = 0x01
-				}
-
-				// XOR the bit value.
-				c.Pixels[a] = c.Pixels[a] ^ v
-			}
+		if c.Graphics.WriteSprite(c.Memory[c.I:c.I+n], x, y) {
+			cf = 0x01
 		}
+
 		c.V[0xF] = cf
 		c.PC += 2
 

@@ -40,6 +40,44 @@ type Graphics struct {
 	Display
 }
 
+// DrawSprite draws a sprite to the graphics array starting at coording x, y.
+// If there is a collision, WriteSprite returns true.
+func (g *Graphics) WriteSprite(sprite []byte, x, y byte) (collision bool) {
+	n := len(sprite)
+
+	for yl := 0; yl < n; yl++ {
+		// A row of sprite data.
+		r := sprite[yl]
+
+		for xl := 0; xl < 8; xl++ {
+			// This represents a mask for the bit that we
+			// care about for this coordinate.
+			i := 0x80 >> byte(xl)
+
+			var v byte
+
+			// Whether the bit should be set or not
+			if (r & byte(i)) == byte(i) {
+				v = 0x01
+			}
+
+			// The address for this bit of data on the
+			// graphics array.
+			a := uint16(x) + uint16(xl) + ((uint16(y) + uint16(yl)) * GraphicsWidth)
+
+			// If there's a collision, set the carry flag.
+			if g.Pixels[a] == 0x01 {
+				collision = true
+			}
+
+			// XOR the bit value.
+			g.Pixels[a] = g.Pixels[a] ^ v
+		}
+	}
+
+	return
+}
+
 func (g *Graphics) String() string {
 	var s string
 
