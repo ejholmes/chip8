@@ -596,17 +596,19 @@ func (c *CPU) Dispatch(op uint16) error {
 		y := c.V[(op&0x00F0)>>4]
 		n := op & 0x000F
 
-		for yl := 0; uint16(yl) < n; yl++ {
-			p := c.Memory[c.I+uint16(yl)]
+		for yl := 0; uint16(yl) < n-1; yl++ {
+			p := c.Memory[c.I+uint16(yl)] >> 4
 
-			for xl := 0; xl < 8; xl++ {
-				if (p & (0x80 >> byte(xl))) != 0 {
-					a := x + byte(xl) + ((y + byte(yl)) * GraphicsWidth)
-					if c.Pixels[a] == 0x01 {
-						cf = 0x01
-					}
-					c.Pixels[a] = c.Pixels[a] ^ 0x01
+			for xl := 0; xl < 4; xl++ {
+				i := 0x8 >> byte(xl)
+				v := p & byte(i) >> (3 - byte(xl))
+				a := x + byte(xl) + ((y + byte(yl)) * GraphicsWidth)
+
+				if c.Pixels[a] == 0x01 {
+					cf = 0x01
 				}
+
+				c.Pixels[a] = c.Pixels[a] ^ v
 			}
 		}
 		c.V[0xF] = cf

@@ -4,7 +4,11 @@
 
 package chip8
 
-import "github.com/nsf/termbox-go"
+import (
+	"fmt"
+
+	"github.com/nsf/termbox-go"
+)
 
 const (
 	GraphicsWidth  = 64 // Pixels
@@ -34,6 +38,26 @@ type Graphics struct {
 
 	// The display to render to. The nil value is the DefaultDisplay.
 	Display
+}
+
+func (g *Graphics) String() string {
+	var s string
+
+	for y := 0; y < GraphicsHeight-1; y++ {
+		for x := 0; x < GraphicsWidth-1; x++ {
+			c := y*GraphicsWidth + x
+
+			var v string
+			if g.Pixels[c] == 0x01 {
+				v = "X"
+			}
+
+			s += fmt.Sprintf("%s ", v)
+		}
+		fmt.Printf("\n")
+	}
+
+	return s
 }
 
 // Draw draws the graphics array to the Display.
@@ -83,7 +107,6 @@ func (d *display) Render(g *Graphics) error {
 			v := ' '
 
 			if g.Pixels[c] == 0x01 {
-				DefaultLogger.Printf("x=%d y=%d coord=%d value=%d", x, y, c, g.Pixels[c])
 				v = '*'
 			}
 

@@ -359,14 +359,24 @@ var opcodeTests = map[string][]struct {
 	},
 
 	"Dxyn - DRW Vx, Vy, nibble": {
+		//{
+		//0xD001,
+		//func(t *testing.T, c *CPU) {
+		//c.I = 0x200
+		//c.Memory[0x200] = 0x01
+		//},
+		//func(t *testing.T, c *CPU) {
+		//checkHex(t, "Pixel", c.Pixels[0], 0x00)
+		//},
+		//},
+
 		{
-			0xD001,
+			0xD005,
 			func(t *testing.T, c *CPU) {
-				c.I = 0x200
-				c.Memory[0x200] = 0x01
+				c.I = 0x0
 			},
 			func(t *testing.T, c *CPU) {
-				checkHex(t, "Pixel", c.Pixels[0], 0x00)
+				checkHex(t, "Pixel", c.Pixels[0], 0x01)
 			},
 		},
 	},
