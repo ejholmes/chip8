@@ -592,22 +592,42 @@ func (c *CPU) Dispatch(op uint16) error {
 		// screen and sprites.
 
 		var cf byte
+
+		// The starting X coordinate on the graphics array.
 		x := c.V[(op&0x0F00)>>8]
+
+		// The starting Y coordinate on the graphics array.
 		y := c.V[(op&0x00F0)>>4]
+
+		// The height of the sprite.
 		n := op & 0x000F
 
-		for yl := 0; uint16(yl) < n-1; yl++ {
-			p := c.Memory[c.I+uint16(yl)] >> 4
+		for yl := 0; uint16(yl) < n; yl++ {
+			// A row of sprite data.
+			r := c.Memory[c.I+uint16(yl)]
 
-			for xl := 0; xl < 4; xl++ {
-				i := 0x8 >> byte(xl)
-				v := p & byte(i) >> (3 - byte(xl))
-				a := x + byte(xl) + ((y + byte(yl)) * GraphicsWidth)
+			for xl := 0; xl < 8; xl++ {
+				// This represents a mask for the bit that we
+				// care about for this coordinate.
+				i := 0x80 >> byte(xl)
 
+				var v byte
+
+				// Whether the bit should be set or not
+				if (r & byte(i)) == byte(i) {
+					v = 0x01
+				}
+
+				// The address for this bit of data on the
+				// graphics array.
+				a := uint16(x) + uint16(xl) + ((uint16(y) + uint16(yl)) * GraphicsWidth)
+
+				// If there's a collision, set the carry flag.
 				if c.Pixels[a] == 0x01 {
 					cf = 0x01
 				}
 
+				// XOR the bit value.
 				c.Pixels[a] = c.Pixels[a] ^ v
 			}
 		}

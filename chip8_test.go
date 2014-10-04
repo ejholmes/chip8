@@ -359,16 +359,30 @@ var opcodeTests = map[string][]struct {
 	},
 
 	"Dxyn - DRW Vx, Vy, nibble": {
-		//{
-		//0xD001,
-		//func(t *testing.T, c *CPU) {
-		//c.I = 0x200
-		//c.Memory[0x200] = 0x01
-		//},
-		//func(t *testing.T, c *CPU) {
-		//checkHex(t, "Pixel", c.Pixels[0], 0x00)
-		//},
-		//},
+		{
+			0xD001,
+			func(t *testing.T, c *CPU) {
+				c.I = 0x200
+				c.Memory[0x200] = 0x01
+			},
+			func(t *testing.T, c *CPU) {
+				checkHex(t, "Pixel", c.Pixels[0], 0x00)
+				checkHex(t, "VF", c.V[0xF], 0x0)
+			},
+		},
+
+		{
+			0xD001,
+			func(t *testing.T, c *CPU) {
+				c.I = 0x200
+				c.Memory[0x200] = 0x01
+				c.Pixels[0x0] = 0x01
+			},
+			func(t *testing.T, c *CPU) {
+				checkHex(t, "Pixel", c.Pixels[0], 0x01)
+				checkHex(t, "VF", c.V[0xF], 0x1)
+			},
+		},
 
 		{
 			0xD005,
@@ -376,7 +390,33 @@ var opcodeTests = map[string][]struct {
 				c.I = 0x0
 			},
 			func(t *testing.T, c *CPU) {
-				checkHex(t, "Pixel", c.Pixels[0], 0x01)
+				checkHex(t, "Pixels[0]", c.Pixels[0], 0x01)
+				checkHex(t, "Pixels[1]", c.Pixels[1], 0x01)
+				checkHex(t, "Pixels[2]", c.Pixels[2], 0x01)
+				checkHex(t, "Pixels[3]", c.Pixels[3], 0x01)
+				checkHex(t, "Pixels[4]", c.Pixels[4], 0x00)
+
+				checkHex(t, "Pixels[64]", c.Pixels[64], 0x01)
+				checkHex(t, "Pixels[65]", c.Pixels[65], 0x00)
+				checkHex(t, "Pixels[66]", c.Pixels[66], 0x00)
+				checkHex(t, "Pixels[67]", c.Pixels[67], 0x01)
+
+				checkHex(t, "Pixels[128]", c.Pixels[128], 0x01)
+				checkHex(t, "Pixels[129]", c.Pixels[129], 0x00)
+				checkHex(t, "Pixels[130]", c.Pixels[130], 0x00)
+				checkHex(t, "Pixels[131]", c.Pixels[131], 0x01)
+
+				checkHex(t, "Pixels[192]", c.Pixels[192], 0x01)
+				checkHex(t, "Pixels[193]", c.Pixels[193], 0x00)
+				checkHex(t, "Pixels[194]", c.Pixels[194], 0x00)
+				checkHex(t, "Pixels[195]", c.Pixels[195], 0x01)
+
+				checkHex(t, "Pixels[256]", c.Pixels[257], 0x01)
+				checkHex(t, "Pixels[257]", c.Pixels[257], 0x01)
+				checkHex(t, "Pixels[258]", c.Pixels[258], 0x01)
+				checkHex(t, "Pixels[259]", c.Pixels[259], 0x01)
+
+				checkHex(t, "VF", c.V[0xF], 0x00)
 			},
 		},
 	},
