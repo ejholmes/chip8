@@ -12,7 +12,7 @@ var opcodeTests = map[string][]struct {
 			0x2100,
 			nil,
 			func(t *testing.T, c *CPU) {
-				checkHex(t, "Stack[0]", c.Stack[0], 0x200)
+				checkHex(t, "Stack[1]", c.Stack[1], 0x200)
 				checkHex(t, "SP", c.SP, 0x1)
 				checkHex(t, "PC", c.PC, 0x100)
 			},

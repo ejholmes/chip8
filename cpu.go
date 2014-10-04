@@ -248,8 +248,8 @@ func (c *CPU) Dispatch(op uint16) error {
 		// current PC on the top of the stack. The PC is then set to
 		// nnn.
 
-		c.Stack[c.SP] = c.PC
 		c.SP++
+		c.Stack[c.SP] = c.PC
 		c.PC = op & 0x0FFF
 
 		break
@@ -662,6 +662,8 @@ func (c *CPU) Dispatch(op uint16) error {
 
 			c.I = c.I + uint16(c.V[x])
 
+			c.PC += 2
+
 			break
 
 		// Fx29 - LD F, Vx
@@ -715,6 +717,8 @@ func (c *CPU) Dispatch(op uint16) error {
 			c.PC += 2
 
 			break
+		default:
+			return &UnknownOpcode{Opcode: op}
 		}
 	default:
 		return &UnknownOpcode{Opcode: op}
