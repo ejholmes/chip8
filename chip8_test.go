@@ -437,7 +437,7 @@ var opcodeTests = map[string][]struct {
 		{
 			0xE19E,
 			func(t *testing.T, c *CPU) {
-				v.V[0x01] = 0x02
+				c.V[0x01] = 0x02
 				c.Keypad = KeypadFunc(func() (byte, error) {
 					return 0x02, nil
 				})
