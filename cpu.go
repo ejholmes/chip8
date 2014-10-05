@@ -183,6 +183,51 @@ func (c *CPU) Run() error {
 	return nil
 }
 
+type instruction func(uint16, *CPU) error
+
+// Primary dispatch table for top level opcodes.
+var table = map[uint16]instruction{
+	0x1000: cpu1nnn,
+	0x2000: cpu2nnn,
+	0x3000: cpu3xkk,
+}
+
+// Jump to location nnn.
+//
+// The interpreter sets the program counter to nnn.
+func cpu1nnn(op uint16, c *CPU) error {
+	c.PC = op & 0x0FFF
+	return nil
+}
+
+// Call subroutine at nnn.
+//
+// The interpreter increments the stack pointer, then puts the
+// current PC on the top of the stack. The PC is then set to
+// nnn.
+func cpu2nnn(op uint16, c *CPU) error {
+	c.SP++
+	c.Stack[c.SP] = c.PC
+	c.PC = op & 0x0FFF
+	return nil
+}
+
+// Skip next instruction if Vx = kk.
+//
+// The interpreter compares register Vx to kk, and if they are
+// equal, increments the program counter by 2.
+func cpu3xkk(op uint16, c *CPU) error {
+	x := (op & 0x0F00) >> 8
+	kk := byte(op)
+
+	c.PC += 2
+	if c.V[x] == kk {
+		c.PC += 2
+	}
+
+	return nil
+}
+
 // Dispatch executes the given opcode.
 func (c *CPU) Dispatch(op uint16) error {
 	// In these listings, the following variables are used:
@@ -192,6 +237,11 @@ func (c *CPU) Dispatch(op uint16) error {
 	// x - A 4-bit value, the lower 4 bits of the high byte of the instruction
 	// y - A 4-bit value, the upper 4 bits of the low byte of the instruction
 	// kk or byte - An 8-bit value, the lowest 8 bits of the instruction
+
+	fn := table[op&0xF000]
+	if fn != nil {
+		return fn(op, c)
+	}
 
 	switch op & 0xF000 {
 	// 0nnn - SYS addr
@@ -226,47 +276,6 @@ func (c *CPU) Dispatch(op uint16) error {
 			// ignored by modern interpreters.
 
 			return &UnknownOpcode{Opcode: op}
-		}
-
-		break
-
-	// 1nnn - JP addr
-	case 0x1000:
-		// Jump to location nnn.
-		//
-		// The interpreter sets the program counter to nnn.
-
-		c.PC = op & 0x0FFF
-
-		break
-
-	// 2nnn - CALL addr
-	case 0x2000:
-		// Call subroutine at nnn.
-		//
-		// The interpreter increments the stack pointer, then puts the
-		// current PC on the top of the stack. The PC is then set to
-		// nnn.
-
-		c.SP++
-		c.Stack[c.SP] = c.PC
-		c.PC = op & 0x0FFF
-
-		break
-
-	// 3xkk - SE Vx, byte
-	case 0x3000:
-		// Skip next instruction if Vx = kk.
-		//
-		// The interpreter compares register Vx to kk, and if they are
-		// equal, increments the program counter by 2.
-
-		x := (op & 0x0F00) >> 8
-		kk := byte(op)
-
-		c.PC += 2
-		if c.V[x] == kk {
-			c.PC += 2
 		}
 
 		break
