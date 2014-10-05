@@ -225,6 +225,8 @@ func (c *CPU) Dispatch(op uint16) error {
 			c.PC = c.Stack[c.SP]
 			c.SP--
 
+			c.PC += 2
+
 			break
 
 		default:
@@ -782,11 +784,14 @@ func (c *CPU) Dispatch(op uint16) error {
 			// Store registers V0 through Vx in memory starting at
 			// location I.
 			//
-			// The interpreter copies the values of registers V0 through Vx into memory, starting at the address in I.
+			// The interpreter copies the values of registers V0
+			// through Vx into memory, starting at the address in I.
 
 			for i := 0; uint16(i) <= x; i++ {
 				c.Memory[c.I+uint16(i)] = c.V[i]
 			}
+
+			c.PC += 2
 
 			break
 
