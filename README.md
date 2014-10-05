@@ -2,7 +2,7 @@
 
 [Godoc](https://godoc.org/github.com/ejholmes/chip8)
 
-CHIP-8 emulator written in Go. This is an expiriment to teach myself Go.
+CHIP-8 emulator written in Go.
 
 ## Reference
 
