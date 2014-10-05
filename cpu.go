@@ -705,8 +705,16 @@ func (c *CPU) Dispatch(op uint16) error {
 
 			break
 
-		// Sets the delay timer to VX.
+		// Fx15 - LD DT, Vx
 		case 0x15:
+			// Set delay timer = Vx.
+			//
+			// DT is set equal to the value of Vx.
+
+			c.delayTimer = c.V[x]
+			c.PC += 2
+
+			break
 
 		// Sets the sound timer to VX.
 		case 0x18:
