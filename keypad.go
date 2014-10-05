@@ -23,6 +23,17 @@ type Keypad interface {
 	Get() (byte, error)
 }
 
+// Keypad func can be used to wrap a function that returns a byte as a Keypad.
+type KeypadFunc func() (byte, error)
+
+func (f KeypadFunc) Init() error {
+	return nil
+}
+
+func (f KeypadFunc) Get() (byte, error) {
+	return f()
+}
+
 // keyboard is a Keypad implementation that maps keys
 // from a standard keyboard to the CHIP-8 keyboard.
 type keyboard struct{}

@@ -616,13 +616,41 @@ func (c *CPU) Dispatch(op uint16) error {
 		break
 
 	case 0xE000:
+		x := (op & 0x0F00) >> 8
+
 		switch op & 0x00FF {
-		// Skips the next instruction if the key stored in VX is pressed.
+		// Ex9E - SKP Vx
 		case 0x9E:
+			// Skip next instruction if key with the value of Vx is
+			// pressed.
+			//
+			// Checks the keyboard, and if the key corresponding to
+			// the value of Vx is currently in the down position, PC
+			// is increased by 2.
+
+			c.PC += 2
+
+			b, err := c.getKey()
+			if err != nil {
+				return err
+			}
+
+			if c.V[x] == b {
+				c.PC += 2
+			}
+
+			break
 
 		// Skips the next instruction if the key stored in VX isn't pressed.
 		case 0xA1:
+
+			break
+
+		default:
+			return &UnknownOpcode{Opcode: op}
 		}
+
+		break
 	case 0xF000:
 		x := (op & 0x0F00) >> 8
 
