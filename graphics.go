@@ -15,10 +15,6 @@ const (
 	GraphicsHeight = 32 // Pixels
 )
 
-var (
-	DefaultDisplay = Display(&display{})
-)
-
 // Display represents the output display for the CHIP-8 graphics array.
 type Display interface {
 	// Turn on the display and do any initialization.

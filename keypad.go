@@ -10,11 +10,8 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-var DefaultKeypad = &keyboard{}
-
-var (
-	ErrQuit = errors.New("quit key pressed")
-)
+// ErrQuit can be returned when we need to indicate that the user wants to quit.
+var ErrQuit = errors.New("quit key pressed")
 
 // Keypad represents a CHIP-8 Keypad.
 type Keypad interface {

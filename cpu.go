@@ -29,6 +29,12 @@ import (
 
 // Sensible defaults
 var (
+	// DefaultKeypad is the default Keypad to use for input.
+	DefaultKeypad Keypad = &keyboard{}
+
+	// DefaultDisplay is the default Display to render graphics data to.
+	DefaultDisplay Display = &display{}
+
 	// DefaultLogger is the default logger to use. Defaults to logging to /dev/null
 	DefaultLogger = log.New(ioutil.Discard, "", 0)
 
@@ -107,7 +113,7 @@ type CPU struct {
 	Logger *log.Logger
 
 	// Settable in tests.
-	randByteFunc func() byte
+	randFunc func() byte
 }
 
 // Options provides a means of configuring the CPU.
@@ -155,14 +161,11 @@ func (c *CPU) init() error {
 
 // Step runs a single CPU cycle.
 func (c *CPU) Step() (uint16, error) {
-	// Simulate the clock speed of the CHIP-8 CPU.
-	<-c.Clock
-
 	// Decode the opcode.
-	op := c.op()
+	op := c.decodeOp()
 
 	// Dispatch the opcode.
-	if err := c.Dispatch(c.op()); err != nil {
+	if err := c.Dispatch(op); err != nil {
 		return op, err
 	}
 
@@ -172,6 +175,9 @@ func (c *CPU) Step() (uint16, error) {
 // Run does the thing.
 func (c *CPU) Run() error {
 	for {
+		// Simulate the clock speed of the CHIP-8 CPU.
+		<-c.Clock
+
 		op, err := c.Step()
 		if err != nil {
 			return err
@@ -728,16 +734,16 @@ func (c *CPU) Dispatch(op uint16) error {
 }
 
 // op returns the next op code.
-func (c *CPU) op() uint16 {
+func (c *CPU) decodeOp() uint16 {
 	return uint16(c.Memory[c.PC])<<8 | uint16(c.Memory[c.PC+1])
 }
 
 func (c *CPU) randByte() byte {
-	if c.randByteFunc == nil {
+	if c.randFunc == nil {
 		return randByte()
 	}
 
-	return c.randByteFunc()
+	return c.randFunc()
 }
 
 func (c *CPU) getKey() (byte, error) {
@@ -783,7 +789,7 @@ func (e *UnknownOpcode) Error() string {
 	return fmt.Sprintf("chip8: unknown opcode: 0x%04X", e.Opcode)
 }
 
-// randByte returns a random byte.
+// randByte returns a random value between 0 and 255.
 func randByte() byte {
 	return byte(rand.New(rand.NewSource(time.Now().UnixNano())).Intn(255))
 }

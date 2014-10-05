@@ -348,7 +348,7 @@ var opcodeTests = map[string][]struct {
 		{
 			0xC110,
 			func(t *testing.T, c *CPU) {
-				c.randByteFunc = func() byte {
+				c.randFunc = func() byte {
 					return 0x01
 				}
 			},
@@ -547,12 +547,12 @@ func TestCPU_Load(t *testing.T) {
 	checkHex(t, "Memory[0x201]", c.Memory[0x201], 0x02)
 }
 
-func TestCPU_op(t *testing.T) {
+func TestCPU_decodeOp(t *testing.T) {
 	c, _ := NewCPU(nil)
 	c.Memory[0x200] = 0xA2
 	c.Memory[0x201] = 0xF0
 
-	checkHex(t, "op", c.op(), 0xA2F0)
+	checkHex(t, "op", c.decodeOp(), 0xA2F0)
 }
 
 func tryUint16(v interface{}) uint16 {
