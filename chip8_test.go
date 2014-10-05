@@ -475,6 +475,18 @@ var opcodeTests = map[string][]struct {
 		},
 	},
 
+	"Fx07 - LD Vx, DT": {
+		{
+			0xF107,
+			func(t *testing.T, c *CPU) {
+				c.delayTimer = 0x01
+			},
+			func(t *testing.T, c *CPU) {
+				checkHex(t, "V[1]", c.V[1], 0x01)
+			},
+		},
+	},
+
 	"Fx29 - LD F, Vx": {
 		{
 			0xF029,

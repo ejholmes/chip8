@@ -108,8 +108,11 @@ type CPU struct {
 	// zero value is the DefaultLogger.
 	Logger *log.Logger
 
-	// Settable in tests.
+	// A function to randomy generate a value between 0 and 255. The default
+	// value is the randByte function.
 	randFunc func() byte
+
+	delayTimer byte
 }
 
 // Options provides a means of configuring the CPU.
@@ -645,7 +648,7 @@ func (c *CPU) Dispatch(op uint16) error {
 		case 0xA1:
 			// Skip next instruction if key with the value of Vx is
 			// not pressed.
-
+			//
 			// Checks the keyboard, and if the key corresponding to
 			// the value of Vx is currently in the up position, PC
 			// is increased by 2.
@@ -672,8 +675,16 @@ func (c *CPU) Dispatch(op uint16) error {
 		x := (op & 0x0F00) >> 8
 
 		switch op & 0x00FF {
-		// Sets VX to the value of the delay timer.
+		// Fx07 - LD Vx, DT
 		case 0x07:
+			// Set Vx = delay timer value.
+			//
+			// The value of DT is placed into Vx.
+
+			c.V[x] = c.delayTimer
+			c.PC += 2
+
+			break
 
 		// Fx0A - LD Vx, K
 		case 0x0A:
