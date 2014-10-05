@@ -448,6 +448,33 @@ var opcodeTests = map[string][]struct {
 		},
 	},
 
+	"ExA1 - SKNP Vx": {
+		{
+			0xE1A1,
+			func(t *testing.T, c *CPU) {
+				c.Keypad = KeypadFunc(func() (byte, error) {
+					return 0x01, nil
+				})
+			},
+			func(t *testing.T, c *CPU) {
+				checkHex(t, "PC", c.PC, 0x204)
+			},
+		},
+
+		{
+			0xE1A1,
+			func(t *testing.T, c *CPU) {
+				c.V[0x01] = 0x02
+				c.Keypad = KeypadFunc(func() (byte, error) {
+					return 0x02, nil
+				})
+			},
+			func(t *testing.T, c *CPU) {
+				checkHex(t, "PC", c.PC, 0x202)
+			},
+		},
+	},
+
 	"Fx29 - LD F, Vx": {
 		{
 			0xF029,

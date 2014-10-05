@@ -641,8 +641,25 @@ func (c *CPU) Dispatch(op uint16) error {
 
 			break
 
-		// Skips the next instruction if the key stored in VX isn't pressed.
+		// ExA1 - SKNP Vx
 		case 0xA1:
+			// Skip next instruction if key with the value of Vx is
+			// not pressed.
+
+			// Checks the keyboard, and if the key corresponding to
+			// the value of Vx is currently in the up position, PC
+			// is increased by 2.
+
+			c.PC += 2
+
+			b, err := c.getKey()
+			if err != nil {
+				return err
+			}
+
+			if c.V[x] != b {
+				c.PC += 2
+			}
 
 			break
 
