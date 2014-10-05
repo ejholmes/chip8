@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/ejholmes/chip8"
@@ -56,6 +58,14 @@ func main() {
 
 	// Load the program into RAM.
 	c.LoadBytes(raw)
+
+	sigChan := make(chan os.Signal)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sigChan
+		Display.Close()
+		os.Exit(-2)
+	}()
 
 	// Run it.
 	if err := c.Run(); err != nil {
