@@ -777,8 +777,18 @@ func (c *CPU) Dispatch(op uint16) error {
 
 			break
 
-		// Stores V0 to VX in memory starting at address I.
+		// Fx55 - LD [I], Vx
 		case 0x55:
+			// Store registers V0 through Vx in memory starting at
+			// location I.
+			//
+			// The interpreter copies the values of registers V0 through Vx into memory, starting at the address in I.
+
+			for i := 0; uint16(i) <= x; i++ {
+				c.Memory[c.I+uint16(i)] = c.V[i]
+			}
+
+			break
 
 		// Fx65 - LD Vx, [I]
 		case 0x65:
