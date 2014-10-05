@@ -98,6 +98,12 @@ type CPU struct {
 	// to only execute 60 opcodes per second.
 	Clock <-chan time.Time
 
+	// Delay timer.
+	DT byte
+
+	// Sound timer.
+	ST byte
+
 	// The graphics array.
 	Graphics
 
@@ -111,8 +117,6 @@ type CPU struct {
 	// A function to randomy generate a value between 0 and 255. The default
 	// value is the randByte function.
 	randFunc func() byte
-
-	delayTimer byte
 }
 
 // Options provides a means of configuring the CPU.
@@ -681,7 +685,7 @@ func (c *CPU) Dispatch(op uint16) error {
 			//
 			// The value of DT is placed into Vx.
 
-			c.V[x] = c.delayTimer
+			c.V[x] = c.DT
 			c.PC += 2
 
 			break
@@ -711,13 +715,21 @@ func (c *CPU) Dispatch(op uint16) error {
 			//
 			// DT is set equal to the value of Vx.
 
-			c.delayTimer = c.V[x]
+			c.DT = c.V[x]
 			c.PC += 2
 
 			break
 
-		// Sets the sound timer to VX.
+		// Fx18 - LD ST, Vx
 		case 0x18:
+			// Set sound timer = Vx.
+			//
+			// ST is set equal to the value of Vx.
+
+			c.ST = c.V[x]
+			c.PC += 2
+
+			break
 
 		// Fx1E - ADD I, Vx
 		case 0x1E:

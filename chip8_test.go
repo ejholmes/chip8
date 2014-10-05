@@ -479,7 +479,7 @@ var opcodeTests = map[string][]struct {
 		{
 			0xF107,
 			func(t *testing.T, c *CPU) {
-				c.delayTimer = 0x01
+				c.DT = 0x01
 			},
 			func(t *testing.T, c *CPU) {
 				checkHex(t, "V[1]", c.V[1], 0x01)
@@ -494,7 +494,19 @@ var opcodeTests = map[string][]struct {
 				c.V[1] = 0x05
 			},
 			func(t *testing.T, c *CPU) {
-				checkHex(t, "delayTimer", c.delayTimer, 0x05)
+				checkHex(t, "DT", c.DT, 0x05)
+			},
+		},
+	},
+
+	"Fx18 - LD ST, Vx": {
+		{
+			0xF118,
+			func(t *testing.T, c *CPU) {
+				c.V[1] = 0x05
+			},
+			func(t *testing.T, c *CPU) {
+				checkHex(t, "ST", c.ST, 0x05)
 			},
 		},
 	},
