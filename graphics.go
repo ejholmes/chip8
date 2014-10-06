@@ -46,6 +46,9 @@ func (g *Graphics) WriteSprite(sprite []byte, x, y byte) (collision bool) {
 			// care about for this coordinate.
 			i := 0x80 >> byte(xl)
 
+			// Whether the bit is set or not.
+			set := (r & byte(i)) == byte(i)
+
 			// The X position for this pixel
 			xp := uint16(x) + uint16(xl)
 			if xp >= GraphicsWidth {
@@ -58,7 +61,7 @@ func (g *Graphics) WriteSprite(sprite []byte, x, y byte) (collision bool) {
 				yp = yp - GraphicsHeight
 			}
 
-			if g.Set(xp, yp, (r&byte(i)) == byte(i)) {
+			if g.Set(xp, yp, set) {
 				collision = true
 			}
 		}
