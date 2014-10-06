@@ -46,13 +46,6 @@ func (g *Graphics) WriteSprite(sprite []byte, x, y byte) (collision bool) {
 			// care about for this coordinate.
 			i := 0x80 >> byte(xl)
 
-			var v byte
-
-			// Whether the bit should be set or not
-			if (r & byte(i)) == byte(i) {
-				v = 0x01
-			}
-
 			// The X position for this pixel
 			xp := uint16(x) + uint16(xl)
 			if xp >= GraphicsWidth {
@@ -65,17 +58,9 @@ func (g *Graphics) WriteSprite(sprite []byte, x, y byte) (collision bool) {
 				yp = yp - GraphicsHeight
 			}
 
-			// The address for this bit of data on the
-			// graphics array.
-			a := xp + (yp * GraphicsWidth)
-
-			// If there's a collision, set the carry flag.
-			if g.Pixels[a] == 0x01 {
+			if g.Set(xp, yp, (r&byte(i)) == byte(i)) {
 				collision = true
 			}
-
-			// XOR the bit value.
-			g.Pixels[a] = g.Pixels[a] ^ v
 		}
 	}
 
@@ -102,6 +87,24 @@ func (g *Graphics) EachPixel(fn func(x, y uint16, addr int)) {
 			fn(uint16(x), uint16(y), a)
 		}
 	}
+}
+
+// Set sets the value of the pixel at the coordinate.
+func (g *Graphics) Set(x, y uint16, set bool) (collision bool) {
+	a := x + y*GraphicsWidth
+
+	if g.Pixels[a] == 0x01 {
+		collision = true
+	}
+
+	var v byte
+	if set {
+		v = 0x01
+	}
+
+	g.Pixels[a] = g.Pixels[a] ^ v
+
+	return
 }
 
 func (g *Graphics) display() Display {

@@ -419,6 +419,21 @@ var opcodeTests = map[string][]struct {
 				checkHex(t, "VF", c.V[0xF], 0x00)
 			},
 		},
+
+		{
+			0xD015,
+			func(t *testing.T, c *CPU) {
+				c.V[0] = 0x00
+				c.V[1] = 0x1C
+			},
+			func(t *testing.T, c *CPU) {
+				checkHex(t, "Pixels[1792]", c.Pixels[1792], 0x01)
+				checkHex(t, "Pixels[1793]", c.Pixels[1793], 0x01)
+				checkHex(t, "Pixels[1794]", c.Pixels[1794], 0x01)
+				checkHex(t, "Pixels[1795]", c.Pixels[1795], 0x01)
+				checkHex(t, "Pixels[1796]", c.Pixels[1796], 0x00)
+			},
+		},
 	},
 
 	"Ex9E - SKP Vx": {
