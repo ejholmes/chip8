@@ -172,6 +172,14 @@ func (c *CPU) Step() (uint16, error) {
 		return op, err
 	}
 
+	if c.DT > 0 {
+		c.DT--
+	}
+
+	if c.ST > 0 {
+		c.ST--
+	}
+
 	return op, nil
 }
 
