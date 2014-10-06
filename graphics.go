@@ -47,7 +47,7 @@ func (g *Graphics) WriteSprite(sprite []byte, x, y byte) (collision bool) {
 			i := 0x80 >> byte(xl)
 
 			// Whether the bit is set or not.
-			set := (r & byte(i)) == byte(i)
+			on := (r & byte(i)) == byte(i)
 
 			// The X position for this pixel
 			xp := uint16(x) + uint16(xl)
@@ -61,7 +61,7 @@ func (g *Graphics) WriteSprite(sprite []byte, x, y byte) (collision bool) {
 				yp = yp - GraphicsHeight
 			}
 
-			if g.Set(xp, yp, set) {
+			if g.Set(xp, yp, on) {
 				collision = true
 			}
 		}
@@ -92,8 +92,9 @@ func (g *Graphics) EachPixel(fn func(x, y uint16, addr int)) {
 	}
 }
 
-// Set sets the value of the pixel at the coordinate.
-func (g *Graphics) Set(x, y uint16, set bool) (collision bool) {
+// Set turns the pixel at the given coordinates on or off. If there's a
+// collision, it returns true.
+func (g *Graphics) Set(x, y uint16, on bool) (collision bool) {
 	a := x + y*GraphicsWidth
 
 	if g.Pixels[a] == 0x01 {
@@ -101,7 +102,7 @@ func (g *Graphics) Set(x, y uint16, set bool) (collision bool) {
 	}
 
 	var v byte
-	if set {
+	if on {
 		v = 0x01
 	}
 
