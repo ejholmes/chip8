@@ -4,11 +4,7 @@
 
 package chip8
 
-import (
-	"fmt"
-
-	"github.com/nsf/termbox-go"
-)
+import "github.com/nsf/termbox-go"
 
 const (
 	GraphicsWidth  = 64 // Pixels
@@ -57,9 +53,21 @@ func (g *Graphics) WriteSprite(sprite []byte, x, y byte) (collision bool) {
 				v = 0x01
 			}
 
+			// The X position for this pixel
+			xp := uint16(x) + uint16(xl)
+			if xp >= GraphicsWidth {
+				xp = xp - GraphicsWidth
+			}
+
+			// The Y position for this pixel
+			yp := uint16(y) + uint16(yl)
+			if yp >= GraphicsHeight {
+				yp = yp - GraphicsHeight
+			}
+
 			// The address for this bit of data on the
 			// graphics array.
-			a := uint16(x) + uint16(xl) + ((uint16(y) + uint16(yl)) * GraphicsWidth)
+			a := xp + (yp * GraphicsWidth)
 
 			// If there's a collision, set the carry flag.
 			if g.Pixels[a] == 0x01 {
@@ -76,12 +84,9 @@ func (g *Graphics) WriteSprite(sprite []byte, x, y byte) (collision bool) {
 
 // Clear clears the display.
 func (g *Graphics) Clear() {
-	for y := 0; y < GraphicsHeight-1; y++ {
-		for x := 0; x < GraphicsWidth-1; x++ {
-			c := y*GraphicsWidth + x
-			g.Pixels[c] = 0
-		}
-	}
+	g.EachPixel(func(_, _ uint16, addr int) {
+		g.Pixels[addr] = 0
+	})
 }
 
 // Draw draws the graphics array to the Display.
@@ -89,24 +94,14 @@ func (g *Graphics) Draw() error {
 	return g.display().Render(g)
 }
 
-func (g *Graphics) String() string {
-	var s string
-
+// EachPixel yields each pixel in the graphics array to fn.
+func (g *Graphics) EachPixel(fn func(x, y uint16, addr int)) {
 	for y := 0; y < GraphicsHeight-1; y++ {
 		for x := 0; x < GraphicsWidth-1; x++ {
-			c := y*GraphicsWidth + x
-
-			var v string
-			if g.Pixels[c] == 0x01 {
-				v = "X"
-			}
-
-			s += fmt.Sprintf("%s ", v)
+			a := y*GraphicsWidth + x
+			fn(uint16(x), uint16(y), a)
 		}
-		fmt.Printf("\n")
 	}
-
-	return s
 }
 
 func (g *Graphics) display() Display {
@@ -145,24 +140,21 @@ func (d *display) Close() {
 }
 
 func (d *display) Render(g *Graphics) error {
-	for y := 0; y < GraphicsHeight-1; y++ {
-		for x := 0; x < GraphicsWidth-1; x++ {
-			c := y*GraphicsWidth + x
-			v := ' '
+	g.EachPixel(func(x, y uint16, addr int) {
+		v := ' '
 
-			if g.Pixels[c] == 0x01 {
-				v = '*'
-			}
-
-			termbox.SetCell(
-				x,
-				y,
-				v,
-				fg,
-				bg,
-			)
+		if g.Pixels[addr] == 0x01 {
+			v = '*'
 		}
-	}
+
+		termbox.SetCell(
+			int(x),
+			int(y),
+			v,
+			fg,
+			bg,
+		)
+	})
 
 	return termbox.Flush()
 }
