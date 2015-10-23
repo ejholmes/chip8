@@ -129,9 +129,9 @@ var (
 	bg = termbox.ColorDefault
 )
 
-// TermboxInit initializes termbox with appropriate settings. This should be
+// termboxInit initializes termbox with appropriate settings. This should be
 // called before using the TermboxDisplay and TermboxKeypad.
-func TermboxInit() error {
+func termboxInit(bg termbox.Attribute) error {
 	if err := termbox.Init(); err != nil {
 		return err
 	}
@@ -145,17 +145,18 @@ func TermboxInit() error {
 	return termbox.Flush()
 }
 
-func TermboxCleanup() {
-	termbox.Close()
-}
-
 // TermboxDisplay is an implementation of the Display interface that renders
 // the graphics array to the terminal.
-type TermboxDisplay struct{}
+type TermboxDisplay struct {
+	fg, bg termbox.Attribute
+}
 
 // NewTermboxDisplay returns a new TermboxDisplay instance.
-func NewTermboxDisplay() *TermboxDisplay {
-	return &TermboxDisplay{}
+func NewTermboxDisplay(fg, bg termbox.Attribute) (*TermboxDisplay, error) {
+	return &TermboxDisplay{
+		fg: fg,
+		bg: bg,
+	}, termboxInit(bg)
 }
 
 // Render renders the graphics array to the terminal using Termbox.
@@ -171,10 +172,14 @@ func (d *TermboxDisplay) Render(g *Graphics) error {
 			int(x),
 			int(y),
 			v,
-			fg,
-			bg,
+			d.fg,
+			d.bg,
 		)
 	})
 
 	return termbox.Flush()
+}
+
+func (d *TermboxDisplay) Close() {
+	termbox.Close()
 }

@@ -8,6 +8,7 @@ import (
 
 	"github.com/codegangsta/cli"
 	"github.com/ejholmes/chip8"
+	"github.com/nsf/termbox-go"
 )
 
 var cmdRun = cli.Command{
@@ -26,13 +27,13 @@ func runRun(c *cli.Context) {
 	program, err := ioutil.ReadFile(c.Args().First())
 	must(err)
 
-	// Initialize termbox.
-	err = chip8.TermboxInit()
-	defer chip8.TermboxCleanup()
-	must(err)
-
 	// Initialize peripherals.
-	d := chip8.NewTermboxDisplay()
+	d, err := chip8.NewTermboxDisplay(
+		termbox.ColorDefault, // Foreground
+		termbox.ColorDefault, // Background
+	)
+	defer d.Close()
+	must(err)
 	k := chip8.NewTermboxKeypad()
 
 	// Initialize CPU.
