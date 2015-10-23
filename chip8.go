@@ -15,12 +15,18 @@ package chip8
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"math/rand"
 	"time"
+)
+
+var (
+	// ErrQuit is returned by Keypads to indicate a shutdown.
+	ErrQuit = errors.New("chip8: shutting down")
 )
 
 // Sensible defaults
@@ -194,6 +200,10 @@ func (c *CPU) Run() error {
 		case <-c.Clock:
 			op, err := c.Step()
 			if err != nil {
+				if err == ErrQuit {
+					return nil
+				}
+
 				return err
 			}
 
@@ -843,10 +853,18 @@ func (c *CPU) decodeOp() uint16 {
 }
 
 func (c *CPU) getKey() (byte, error) {
+	c.logger().Println("Waiting for user input")
+
 	b, err := c.keypad().GetKey()
 	if err != nil {
+		if err == ErrQuit {
+			return b, err
+		}
+
 		return b, fmt.Errorf("chip8: unable to get key from keypad: %s", err.Error())
 	}
+
+	c.logger().Printf("Key pressed: 0x%04X", b)
 
 	return b, nil
 }

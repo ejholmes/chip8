@@ -6,12 +6,10 @@ package chip8
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/nsf/termbox-go"
 )
-
-// ErrQuit can be returned when we need to indicate that the user wants to quit.
-var ErrQuit = errors.New("quit key pressed")
 
 // Keypad represents a CHIP-8 Keypad.
 type Keypad interface {
@@ -47,8 +45,20 @@ var keyMap = map[rune]byte{
 	'z': 0x0A, 'x': 0x00, 'c': 0x0B, 'v': 0x0F,
 }
 
+var escapeKey = '0'
+
 // Get waits for a keypress.
 func (k *TermboxKeypad) GetKey() (byte, error) {
 	event := termbox.PollEvent()
-	return keyMap[event.Ch], nil
+
+	// When the escape key is pressed, exit.
+	if event.Ch == escapeKey {
+		return 0x00, ErrQuit
+	}
+
+	key, ok := keyMap[event.Ch]
+	if !ok {
+		return 0x00, fmt.Errorf("unknown key: %v", event.Ch)
+	}
+	return key, nil
 }

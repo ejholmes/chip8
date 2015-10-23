@@ -16,7 +16,7 @@ import (
 var cmdRun = cli.Command{
 	Name:   "run",
 	Usage:  "Run a chip8 program",
-	Action: runRun,
+	Action: withErrors(runRun),
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "log",
@@ -30,28 +30,35 @@ var cmdRun = cli.Command{
 	},
 }
 
-func runRun(c *cli.Context) {
+func runRun(c *cli.Context) error {
 	// Initialize peripherals.
 	d, err := chip8.NewTermboxDisplay(
 		termbox.ColorDefault, // Foreground
 		termbox.ColorDefault, // Background
 	)
 	defer d.Close()
-	must(err)
+	if err != nil {
+		return err
+	}
+
 	k := chip8.NewTermboxKeypad()
 
 	// Initialize CPU.
 	cpu, err := chip8.NewCPU(&chip8.Options{
 		ClockSpeed: time.Duration(c.Int("clock")),
 	})
-	must(err)
+	if err != nil {
+		return err
+	}
 	cpu.Graphics.Display = d
 	cpu.Keypad = k
 
 	// If a log file is specified, create a logger and add it to the CPU.
 	if fname := c.String("log"); fname != "" {
 		f, err := os.Create(fname)
-		must(err)
+		if err != nil {
+			return err
+		}
 
 		cpu.Logger = log.New(f, "", 0)
 	}
@@ -59,14 +66,20 @@ func runRun(c *cli.Context) {
 	if c.Args().Present() {
 		// Read program.
 		program, err := ioutil.ReadFile(c.Args().First())
-		must(err)
+		if err != nil {
+			return err
+		}
 
 		// Load program.
 		_, err = cpu.LoadBytes(program)
-		must(err)
+		if err != nil {
+			return err
+		}
 	} else {
 		_, err = cpu.Load(os.Stdin)
-		must(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	sig := make(chan os.Signal)
@@ -78,5 +91,5 @@ func runRun(c *cli.Context) {
 
 	// Run it.
 	err = cpu.Run()
-	must(err)
+	return err
 }
