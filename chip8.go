@@ -113,10 +113,6 @@ type CPU struct {
 	// A logger to log information about the CPU while it's executing. The
 	// zero value is the DefaultLogger.
 	Logger *log.Logger
-
-	// A function to randomy generate a value between 0 and 255. The default
-	// value is the randByte function.
-	randFunc func() byte
 }
 
 // Options provides a means of configuring the CPU.
@@ -588,7 +584,7 @@ func (c *CPU) Dispatch(op uint16) error {
 		x := (op & 0x0F00) >> 8
 		kk := byte(op)
 
-		c.V[x] = kk + c.randByte()
+		c.V[x] = kk + randByte()
 
 		c.PC += 2
 
@@ -833,14 +829,6 @@ func (c *CPU) decodeOp() uint16 {
 	return uint16(c.Memory[c.PC])<<8 | uint16(c.Memory[c.PC+1])
 }
 
-func (c *CPU) randByte() byte {
-	if c.randFunc == nil {
-		return randByte()
-	}
-
-	return c.randFunc()
-}
-
 func (c *CPU) getKey() (byte, error) {
 	b, err := c.keypad().Get()
 	if err != nil {
@@ -885,6 +873,6 @@ func (e *UnknownOpcode) Error() string {
 }
 
 // randByte returns a random value between 0 and 255.
-func randByte() byte {
+var randByte = func() byte {
 	return byte(rand.New(rand.NewSource(time.Now().UnixNano())).Intn(255))
 }

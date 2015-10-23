@@ -1,7 +1,4 @@
-.PHONY: cmd test
-
-test:
-	godep go test
+.PHONY: cmd
 
 cmd:
 	godep go build -o ./build/chip8 ./cmd/chip8

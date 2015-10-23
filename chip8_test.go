@@ -2,6 +2,13 @@ package chip8
 
 import "testing"
 
+func init() {
+	// mock out randByte func to return a deterministic value.
+	randByte = func() byte {
+		return 0x01
+	}
+}
+
 var opcodeTests = map[string][]struct {
 	op     int
 	before func(*testing.T, *CPU)
@@ -348,9 +355,6 @@ var opcodeTests = map[string][]struct {
 		{
 			0xC110,
 			func(t *testing.T, c *CPU) {
-				c.randFunc = func() byte {
-					return 0x01
-				}
 			},
 			func(t *testing.T, c *CPU) {
 				checkHex(t, "V[1]", c.V[1], 0x11)
