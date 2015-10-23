@@ -124,11 +124,6 @@ func (g *Graphics) display() Display {
 	return g.Display
 }
 
-var (
-	fg = termbox.ColorBlack
-	bg = termbox.ColorDefault
-)
-
 // termboxInit initializes termbox with appropriate settings. This should be
 // called before using the TermboxDisplay and TermboxKeypad.
 func termboxInit(bg termbox.Attribute) error {
