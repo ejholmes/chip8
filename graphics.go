@@ -13,15 +13,20 @@ const (
 
 // Display represents the output display for the CHIP-8 graphics array.
 type Display interface {
-	// Turn on the display and do any initialization.
-	Init() error
-
-	// Turn off the display and cleanup.
-	Close()
-
 	// Render should render the current graphics array to the display.
 	Render(*Graphics) error
 }
+
+type DisplayFunc func(*Graphics) error
+
+func (f DisplayFunc) Render(g *Graphics) error {
+	return f(g)
+}
+
+// NullDisplay is an implementation of the Display interface that does nothing.
+var NullDisplay = DisplayFunc(func(*Graphics) error {
+	return nil
+})
 
 // Graphics represents the graphics array for the CHIP-8.
 type Graphics struct {
@@ -124,11 +129,9 @@ var (
 	bg = termbox.ColorDefault
 )
 
-// display is an implementation of the Display interface that renders
-// the graphics array to the terminal.
-type display struct{}
-
-func (d *display) Init() error {
+// TermboxInit initializes termbox with appropriate settings. This should be
+// called before using the TermboxDisplay and TermboxKeypad.
+func TermboxInit() error {
 	if err := termbox.Init(); err != nil {
 		return err
 	}
@@ -142,11 +145,21 @@ func (d *display) Init() error {
 	return termbox.Flush()
 }
 
-func (d *display) Close() {
+func TermboxCleanup() {
 	termbox.Close()
 }
 
-func (d *display) Render(g *Graphics) error {
+// TermboxDisplay is an implementation of the Display interface that renders
+// the graphics array to the terminal.
+type TermboxDisplay struct{}
+
+// NewTermboxDisplay returns a new TermboxDisplay instance.
+func NewTermboxDisplay() *TermboxDisplay {
+	return &TermboxDisplay{}
+}
+
+// Render renders the graphics array to the terminal using Termbox.
+func (d *TermboxDisplay) Render(g *Graphics) error {
 	g.EachPixel(func(x, y uint16, addr int) {
 		v := ' '
 

@@ -25,11 +25,12 @@ import (
 
 // Sensible defaults
 var (
-	// DefaultKeypad is the default Keypad to use for input.
-	DefaultKeypad Keypad = &keyboard{}
+	// DefaultKeypad is the default Keypad to use for input. The default is
+	// to always return 0x01.
+	DefaultKeypad Keypad = NullKeypad
 
 	// DefaultDisplay is the default Display to render graphics data to.
-	DefaultDisplay Display = &display{}
+	DefaultDisplay Display = NullDisplay
 
 	// DefaultLogger is the default logger to use. Defaults to logging to /dev/null
 	DefaultLogger = log.New(ioutil.Discard, "", 0)
@@ -113,6 +114,9 @@ type CPU struct {
 	// A logger to log information about the CPU while it's executing. The
 	// zero value is the DefaultLogger.
 	Logger *log.Logger
+
+	// channel used to indicate a shutdown.
+	stop chan struct{}
 }
 
 // Options provides a means of configuring the CPU.
@@ -129,6 +133,7 @@ func NewCPU(options *Options) (*CPU, error) {
 	c := &CPU{
 		PC:    0x200,
 		Clock: time.Tick(time.Second / options.ClockSpeed),
+		stop:  make(chan struct{}),
 	}
 
 	return c, c.init()
@@ -181,19 +186,27 @@ func (c *CPU) Step() (uint16, error) {
 
 // Run does the thing.
 func (c *CPU) Run() error {
+	// Simulate the clock speed of the CHIP-8 CPU.
 	for {
-		// Simulate the clock speed of the CHIP-8 CPU.
-		<-c.Clock
+		select {
+		case <-c.stop:
+			return nil
+		case <-c.Clock:
+			op, err := c.Step()
+			if err != nil {
+				return err
+			}
 
-		op, err := c.Step()
-		if err != nil {
-			return err
+			c.logger().Printf("op=0x%04X %s\n", op, c)
 		}
-
-		c.logger().Printf("op=0x%04X %s\n", op, c)
 	}
 
 	return nil
+}
+
+// Stop stops the CPU from executing.
+func (c *CPU) Stop() {
+	close(c.stop)
 }
 
 // Dispatch executes the given opcode.
@@ -830,7 +843,7 @@ func (c *CPU) decodeOp() uint16 {
 }
 
 func (c *CPU) getKey() (byte, error) {
-	b, err := c.keypad().Get()
+	b, err := c.keypad().GetKey()
 	if err != nil {
 		return b, fmt.Errorf("chip8: unable to get key from keypad: %s", err.Error())
 	}

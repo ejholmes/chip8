@@ -15,31 +15,29 @@ var ErrQuit = errors.New("quit key pressed")
 
 // Keypad represents a CHIP-8 Keypad.
 type Keypad interface {
-	// Do any initialization.
-	Init() error
-
-	// Get waits for input on the keyboard and returns the key that was
+	// GetKey waits for input on the keyboard and returns the key that was
 	// pressed.
-	Get() (byte, error)
+	GetKey() (byte, error)
 }
 
 // Keypad func can be used to wrap a function that returns a byte as a Keypad.
 type KeypadFunc func() (byte, error)
 
-func (f KeypadFunc) Init() error {
-	return nil
-}
-
-func (f KeypadFunc) Get() (byte, error) {
+func (f KeypadFunc) GetKey() (byte, error) {
 	return f()
 }
 
-// keyboard is a Keypad implementation that maps keys
-// from a standard keyboard to the CHIP-8 keyboard.
-type keyboard struct{}
+// NullKeypad is a Keypad that just returns an error.
+var NullKeypad = KeypadFunc(func() (byte, error) {
+	return 0x00, errors.New("null keypad not usable")
+})
 
-func (k *keyboard) Init() error {
-	return nil
+// TermboxKeypad is a Keypad implementation that maps keys from a standard
+// keyboard to the CHIP-8 keyboard and uses termbox to poll for events.
+type TermboxKeypad struct{}
+
+func NewTermboxKeypad() *TermboxKeypad {
+	return &TermboxKeypad{}
 }
 
 var keyMap = map[rune]byte{
@@ -50,11 +48,7 @@ var keyMap = map[rune]byte{
 }
 
 // Get waits for a keypress.
-func (k *keyboard) Get() (byte, error) {
+func (k *TermboxKeypad) GetKey() (byte, error) {
 	event := termbox.PollEvent()
 	return keyMap[event.Ch], nil
-}
-
-// polls for keyboard events.
-func (k *keyboard) poll() {
 }
