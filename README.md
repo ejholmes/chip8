@@ -18,7 +18,7 @@ go get github.com/ejholmes/chip8/cmd/chip8
 And run a binary like so:
 
 ```console
-chip8 -program=myprog.ch8
+chip8 run myprog.ch8
 ```
 
 The default display implementation using
