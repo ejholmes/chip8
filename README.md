@@ -11,13 +11,13 @@ This comes with a `chip8` package that can be used as a library for executing CH
 You can install it with:
 
 ```console
-go get github.com/ejholmes/chip8/cmd/chip8
+$ go install -u github.com/ejholmes/chip8/cmd/chip8
 ```
 
 And run a binary like so:
 
 ```console
-chip8 run myprog.ch8
+$ chip8 run myprog.ch8
 ```
 
 The default display implementation uses [go-termbox](https://github.com/nsf/termbox-go) so the program runs entirely inside your terminal.
