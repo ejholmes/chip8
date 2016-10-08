@@ -1,6 +1,9 @@
 package chip8
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func init() {
 	// mock out randByte func to return a deterministic value.
@@ -681,23 +684,25 @@ func TestCPU_Step(t *testing.T) {
 }
 
 func TestOpcodes(t *testing.T) {
-	for i, tests := range opcodeTests {
-		for _, tt := range tests {
-			c, _ := NewCPU(nil)
-			if tt.before != nil {
-				tt.before(t, c)
-			}
-			c.Dispatch(uint16(tt.op))
-			tt.check(t, c)
+	for instruction, tests := range opcodeTests {
+		for i, tt := range tests {
+			t.Run(fmt.Sprintf("%s/%d", instruction, i), func(t *testing.T) {
+				c, _ := NewCPU(nil)
+				if tt.before != nil {
+					tt.before(t, c)
+				}
+				c.Dispatch(uint16(tt.op))
+				tt.check(t, c)
 
-			if t.Failed() {
-				t.Logf("==============")
-				t.Logf("Instruction: %s", i)
-				t.Logf("Opcode: 0x%04X", tt.op)
-				t.Logf("CPU: %v", c)
-				t.Logf("==============")
-				t.FailNow()
-			}
+				if t.Failed() {
+					t.Logf("==============")
+					t.Logf("Instruction: %s", instruction)
+					t.Logf("Opcode: 0x%04X", tt.op)
+					t.Logf("CPU: %v", c)
+					t.Logf("==============")
+					t.FailNow()
+				}
+			})
 		}
 	}
 }
