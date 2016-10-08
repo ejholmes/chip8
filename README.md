@@ -6,8 +6,7 @@ CHIP-8 emulator written in Go.
 
 ## Usage
 
-This comes with a `chip8` package that can be used as a library for executing
-CHIP-8 binary programs, and also a `chip8` reference command.
+This comes with a `chip8` package that can be used as a library for executing CHIP-8 binary programs, and also a `chip8` reference command.
 
 You can install it with:
 
@@ -21,9 +20,7 @@ And run a binary like so:
 chip8 run myprog.ch8
 ```
 
-The default display implementation using
-[go-termbox](https://github.com/nsf/termbox-go) so the program runs entirely
-inside your terminal.
+The default display implementation uses [go-termbox](https://github.com/nsf/termbox-go) so the program runs entirely inside your terminal.
 
 ## Reference
 
