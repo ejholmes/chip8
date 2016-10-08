@@ -1,0 +1,13 @@
+{
+	"comment": "",
+	"ignore": "",
+	"package": [
+		{
+			"checksumSHA1": "+E2HUM3pckIzWmSo9F9j2n9K6FM=",
+			"path": "github.com/urfave/cli",
+			"revision": "11c134509d89c2018675f369955218a180dc7428",
+			"revisionTime": "2016-07-16T16:11:36Z"
+		}
+	],
+	"rootPath": "github.com/ejholmes/chip8"
+}

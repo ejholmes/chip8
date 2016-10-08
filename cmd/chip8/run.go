@@ -8,9 +8,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/codegangsta/cli"
 	"github.com/ejholmes/chip8"
 	"github.com/nsf/termbox-go"
+	"github.com/urfave/cli"
 )
 
 var cmdRun = cli.Command{
