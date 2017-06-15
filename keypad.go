@@ -13,15 +13,15 @@ import (
 
 // Keypad represents a CHIP-8 Keypad.
 type Keypad interface {
-	// GetKey waits for input on the keyboard and returns the key that was
+	// ReadByte waits for input on the keyboard and returns the key that was
 	// pressed.
-	GetKey() (byte, error)
+	ReadByte() (byte, error)
 }
 
 // Keypad func can be used to wrap a function that returns a byte as a Keypad.
 type KeypadFunc func() (byte, error)
 
-func (f KeypadFunc) GetKey() (byte, error) {
+func (f KeypadFunc) ReadByte() (byte, error) {
 	return f()
 }
 
@@ -48,7 +48,7 @@ var keyMap = map[rune]byte{
 var escapeKey = '0'
 
 // Get waits for a keypress.
-func (k *TermboxKeypad) GetKey() (byte, error) {
+func (k *TermboxKeypad) ReadByte() (byte, error) {
 	event := termbox.PollEvent()
 
 	// When the escape key is pressed, exit.

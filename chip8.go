@@ -855,7 +855,7 @@ func (c *CPU) decodeOp() uint16 {
 func (c *CPU) getKey() (byte, error) {
 	c.logger().Println("Waiting for user input")
 
-	b, err := c.keypad().GetKey()
+	b, err := c.keypad().ReadByte()
 	if err != nil {
 		if err == ErrQuit {
 			return b, err
