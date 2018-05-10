@@ -3,8 +3,6 @@ package chip8
 import (
 	"crypto/sha256"
 	"fmt"
-	"io/ioutil"
-	"path/filepath"
 	"testing"
 )
 
@@ -698,10 +696,10 @@ func checkGraphics(t *testing.T, g *Graphics, hash string) {
 	t.Helper()
 
 	h := fmt.Sprintf("%x", sha256.Sum256(g.Pixels[:]))
-	fname := filepath.Join("test-fixtures", "graphics", h)
-	ioutil.WriteFile(fname, g.Pixels[:], 0644)
 
 	if h != hash {
-		t.Fatalf("Expected graphics hash to be %s, got %s", hash, h)
+		t.Errorf("Expected graphics hash to be %s, got %s", hash, h)
+		t.Log("Graphics Array:")
+		t.Log(g.Pixels)
 	}
 }
