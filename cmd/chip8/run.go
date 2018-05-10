@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
@@ -16,7 +15,7 @@ import (
 var cmdRun = cli.Command{
 	Name:   "run",
 	Usage:  "Run a chip8 program",
-	Action: withErrors(runRun),
+	Action: runRun,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "log",
@@ -63,23 +62,17 @@ func runRun(c *cli.Context) error {
 		cpu.Logger = log.New(f, "", 0)
 	}
 
+	r := os.Stdin
 	if c.Args().Present() {
 		// Read program.
-		program, err := ioutil.ReadFile(c.Args().First())
+		r, err = os.Open(c.Args().First())
 		if err != nil {
 			return err
 		}
-
-		// Load program.
-		_, err = cpu.LoadBytes(program)
-		if err != nil {
-			return err
-		}
-	} else {
-		_, err = cpu.Load(os.Stdin)
-		if err != nil {
-			return err
-		}
+	}
+	_, err = cpu.Load(r)
+	if err != nil {
+		return err
 	}
 
 	sig := make(chan os.Signal)

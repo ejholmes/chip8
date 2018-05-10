@@ -20,12 +20,3 @@ func main() {
 func printErr(err error) {
 	fmt.Fprintf(os.Stderr, "error: %s\n", err)
 }
-
-func withErrors(fn func(c *cli.Context) error) func(*cli.Context) {
-	return func(c *cli.Context) {
-		if err := fn(c); err != nil {
-			printErr(err)
-			os.Exit(-1)
-		}
-	}
-}
