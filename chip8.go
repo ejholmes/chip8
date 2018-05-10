@@ -174,6 +174,8 @@ func (c *CPU) Step() (uint16, error) {
 	// Decode the opcode.
 	op := c.decodeOp()
 
+	c.logger().Printf("op=0x%04X %s\n", op, c)
+
 	// Dispatch the opcode.
 	if err := c.Dispatch(op); err != nil {
 		return op, err
@@ -198,7 +200,7 @@ func (c *CPU) Run() error {
 		case <-c.stop:
 			return nil
 		case <-c.Clock:
-			op, err := c.Step()
+			_, err := c.Step()
 			if err != nil {
 				if err == ErrQuit {
 					return nil
@@ -206,8 +208,6 @@ func (c *CPU) Run() error {
 
 				return err
 			}
-
-			c.logger().Printf("op=0x%04X %s\n", op, c)
 		}
 	}
 

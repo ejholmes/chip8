@@ -687,7 +687,7 @@ func TestOpcodes(t *testing.T) {
 	for instruction, tests := range opcodeTests {
 		for i, tt := range tests {
 			t.Run(fmt.Sprintf("%s/%d", instruction, i), func(t *testing.T) {
-				c, _ := NewCPU(nil)
+				c := newCPU(t)
 				if tt.before != nil {
 					tt.before(t, c)
 				}
@@ -708,7 +708,7 @@ func TestOpcodes(t *testing.T) {
 }
 
 func TestCPU_Load(t *testing.T) {
-	c, _ := NewCPU(nil)
+	c := newCPU(t)
 	p := []byte{0x01, 0x02}
 
 	n, err := c.LoadBytes(p)
@@ -725,11 +725,19 @@ func TestCPU_Load(t *testing.T) {
 }
 
 func TestCPU_decodeOp(t *testing.T) {
-	c, _ := NewCPU(nil)
+	c := newCPU(t)
 	c.Memory[0x200] = 0xA2
 	c.Memory[0x201] = 0xF0
 
 	checkHex(t, "op", c.decodeOp(), 0xA2F0)
+}
+
+func newCPU(t testing.TB) *CPU {
+	c, err := NewCPU(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return c
 }
 
 func tryUint16(v interface{}) uint16 {
@@ -748,6 +756,8 @@ func tryUint16(v interface{}) uint16 {
 }
 
 func checkHex(t *testing.T, subject string, got, want interface{}) {
+	t.Helper()
+
 	g := tryUint16(got)
 	w := tryUint16(want)
 
@@ -757,6 +767,8 @@ func checkHex(t *testing.T, subject string, got, want interface{}) {
 }
 
 func checkGraphics(t *testing.T, g *Graphics, b []byte) {
+	t.Helper()
+
 	for i := 0; i < len(b); i++ {
 		if got, want := g.Pixels[i], b[i]; got != want {
 			t.Errorf("Pixel[%d] => 0x%X; want 0x%X", i, got, want)
