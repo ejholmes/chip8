@@ -4,7 +4,9 @@
 
 package chip8
 
-import "github.com/nsf/termbox-go"
+import (
+	termbox "github.com/nsf/termbox-go"
+)
 
 const (
 	GraphicsWidth  = 64 // Pixels
@@ -56,13 +58,13 @@ func (g *Graphics) WriteSprite(sprite []byte, x, y byte) (collision bool) {
 
 			// The X position for this pixel
 			xp := uint16(x) + uint16(xl)
-			if xp >= GraphicsWidth {
+			for xp >= GraphicsWidth {
 				xp = xp - GraphicsWidth
 			}
 
 			// The Y position for this pixel
 			yp := uint16(y) + uint16(yl)
-			if yp >= GraphicsHeight {
+			for yp >= GraphicsHeight {
 				yp = yp - GraphicsHeight
 			}
 

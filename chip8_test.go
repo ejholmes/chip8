@@ -413,6 +413,17 @@ var opcodeTests = map[string][]struct {
 				checkGraphics(t, &c.Graphics, "796405cda1fa18bbd6e42dd2643af022793a37bc917b24c4bc8f88c242122a93")
 			},
 		},
+		// Wrap y
+		{
+			0xD015,
+			func(t *testing.T, c *CPU) {
+				c.V[0] = 0x00
+				c.V[1] = GraphicsHeight + 28
+			},
+			func(t *testing.T, c *CPU) {
+				checkGraphics(t, &c.Graphics, "796405cda1fa18bbd6e42dd2643af022793a37bc917b24c4bc8f88c242122a93")
+			},
+		},
 	},
 
 	"Ex9E - SKP Vx": {
