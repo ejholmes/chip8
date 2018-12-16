@@ -162,7 +162,7 @@ func (d *TermboxDisplay) Render(g *Graphics) error {
 		v := ' '
 
 		if g.Pixels[addr] == 0x01 {
-			v = '*'
+			v = '█'
 		}
 
 		termbox.SetCell(
