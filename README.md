@@ -1,4 +1,4 @@
-# CHIP-8 [![Build Status](https://travis-ci.org/ejholmes/chip8.svg?branch=master)](https://travis-ci.org/ejholmes/chip8)
+# CHIP-8 [![CI](https://github.com/ejholmes/chip8/actions/workflows/ci.yml/badge.svg)](https://github.com/ejholmes/chip8/actions/workflows/ci.yml)
 
 [Godoc](https://godoc.org/github.com/ejholmes/chip8)
 
