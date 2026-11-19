@@ -1,13 +1,18 @@
 name: CI
 
-on: push
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go-version: ['1.23', '1.22']
+        go-version: ["1.23", "1.22"]
 
     steps:
       - uses: actions/checkout@v4
@@ -16,15 +21,16 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go-version }}
-
-      - name: Download dependencies
-        run: go mod tidy
+          cache-dependency-path: go.sum
 
       - name: Build
-        run: go build -v ./...
+        run: go build ./...
 
       - name: Test
-        run: go test -race -v ./...
+        run: go test ./...
+
+      - name: Test race
+        run: go test -race ./...
 
       - name: Install
         run: go install ./cmd/chip8
