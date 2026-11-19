@@ -1,6 +1,6 @@
 module github.com/ejholmes/chip8
 
-go 1.22
+go 1.23
 
 require (
 	github.com/nsf/termbox-go v1.1.1
